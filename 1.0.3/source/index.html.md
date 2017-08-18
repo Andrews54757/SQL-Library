@@ -13,8 +13,6 @@ search: true
 
 # SuperSQL - Overview
 
-> Setup
-
 ```php
 <?php
 // MySql setup
@@ -27,15 +25,6 @@ $dsn = "mysql:host=$host;port=3306;dbname=$db;charset=utf8";
 $SuperSQL = new SuperSQL($dsn,$user,$pass);
 ?>
 ```
-
-> Setup with helper
-
-```php
-<?php
-$SuperSQL = SQLHelper::connect($host,$db,$user,$pass);
-?>
-```
-
 
 SlickInject and Medoo on steroids - The most advanced and lightweight library of it's kind.
 
@@ -73,10 +62,14 @@ To build this library, do
 
 `node builder.js`
 
-It will build to `/dist/SuperSQL*.php`
+It will build to `/dist/SuperSQL.php`
 
 # Basics
 These are the basic functionalities of SuperSQL. 
+
+<aside class="notice">
+Most of the features listed here are for ADVANCED API. Except for Simple (Simple API) and Responses
+</aside>
 
 ## Responses
 
@@ -335,6 +328,28 @@ You can use an alias for columns and/or tables by adding `[aliasname]`.
 Aliases go after the key, not before ex: `[alias]key` is WRONG, `key[alias]` is RIGHT
 </aside>
 
+## Simple
+
+> Simple queries
+
+```php
+<?php
+$SuperSQL->sSELECT($table,$columns,$where);
+
+$SuperSQL->sINSERT($table,$data);
+
+$SuperSQL->sUPDATE($table,$data,$where);
+
+$SuperSQL->sDELETE($table,$where);
+?>
+```
+
+If you are making simple queries, you may use simple functions to boost performance. Use simple functions by attatching an `s` in front of the function. The syntax is very similar to SlickInject.
+
+<aside class="success">
+Use simple API as much as you can! It is lightning fast! Otherwise, use the helper functions - they will decide for you.
+</aside>
+
 ## Custom Queries
 
 Custom queries can be made using `$SuperSQL->query($query)`.
@@ -344,7 +359,7 @@ Programming guide: If you can, use raw queries. For example, theres nothing sens
 </aside>
 
 
-# Queries
+# Advanced Functions
 
 ```php
 <?php
@@ -358,6 +373,20 @@ SuperSQL->DELETE($table, $where);
 
 ?>
 ```
+
+Advanced functions are for doing advanced queries. Advanced query features include:
+
+* Multi-query
+* Multi-table querying
+* Type Casting
+* Aliasing
+* Use of operators other than `=`
+* Use of "OR"
+* Joins
+
+<aside class="notice">
+If your only going to use advanced API, you can just include `dist/SuperSQL_advanced.php` to get SuperSQL with advanced api only.
+</aside>
 
 ## SELECT
 ```php
@@ -455,12 +484,111 @@ $SuperSQL->DELETE("persons",
 * `(String|Array)table` - Table(s) to insert to
 * `(Array)where` - Conditional statements
 
-# Helper Functions/Queries
+
+# Simple Functions
+
+```php
+<?php
+// Gets data
+$SuperSQL->SELECT($table, $columns, $where);
+// Inserts/adds data to database
+$SuperSQL->sINSERT($table, $data);
+// Updates data in database
+$SuperSQL->sUPDATE($table, $data, $where);
+// Deletes data in database
+$SuperSQL->DELETE($table, $where);
+?>
+```
+
+Simple API is for basic querying. It allows of lightning-fast, simple and easy querying. Unlike the advanced api, you cannot:
+
+* You cannot use other opererators besides `=` (Equal to)
+* No binds - Only `AND` is used
+* No multi-querying
+* No type casting
+
+<aside class="notice">
+If your only going to use simple API, you can just include `dist/SuperSQL_simple.php` to get SuperSQL with simple api only.
+</aside>
+
+## sSELECT
+
+> sSELECT
+```php
+<?php
+$SuperSQL->sSELECT("citizens",["name","age"],[ // SELECT `name`, `age` FROM `citizens` WHERE `in_trouble` = 1
+    "in_trouble" => 1
+]);
+?>
+```
+
+**SuperSQL->SELECT($table, $columns, $where[, $append);**
+
+* `(String)table` - Table to query
+* `(Array)columns` - Columns to return. `[]` is `*`
+* `(Array)where` - Conditional statements
+* `(String)append` - Append to sql (Optional)
+
+## sINSERT
+
+> sINSERT
+```php
+<?php
+$SuperSQL->sINSERT("message_board",array( // INSERT INTO `message_board` (`title`, `SuperSQL`) VALUES ('SuperSQL Saves The Day', 'SuperSQL rocks!')
+    "title" => "SuperSQL Saves The Day",
+    "message" => "SuperSQL rocks!"
+));
+?>
+```
+
+**SuperSQL->sINSERT($table, $data);**
+
+* `(String)table` - Table to insert to
+* `(Array)data` - Data to insert
+
+## sUPDATE
+
+> sUPDATE
+```php
+<?php
+$SuperSQL->sUPDATE("developers",[ // UPDATE `developers` SET `is_happy` = 1, `reason` = 'Becaz SuperSQL is awesome!' WHERE `is_happy` = 0
+"is_happy" => 0,
+],[
+"is_happy" => 1,
+"reason" => "Becaz SuperSQL is awesome!"
+]);
+?>
+```
+
+**SuperSQL->sUPDATE($table, $data, $where);**
+
+* `(String)table` - Table to insert to
+* `(Array)data` - Data to update
+* `(Array)where` - Conditional statements
+
+## sDELETE
+
+> sDELETE
+```php
+<?php
+$SuperSQL->sDELETE("hackers",[ // DELETE FROM `hackers` WHERE `status` = 'Tried to SQL Inject attack a site' AND `encountered` = 'SuperSQL'
+    "status" => "Tried to SQL Inject attack a site",
+    "encountered" => "SuperSQL"
+]);
+?>
+```
+
+**SuperSQL->DELETE($table, $where);**
+
+* `(String)table` - Table to insert to
+* `(Array)where` - Conditional statements
+
+# Helper Functions
 SuperSQL provides some helper functions to allow for easier access. The helper functions allow you to:
 
 * Connect easily
 * Manage multiple database connections
-* Other queries
+* Do queries more efficiently
 
 <aside class="notice">
 If your using the built/compiled file, you must include `dist/SuperSQL_helper.php` too
@@ -470,9 +598,9 @@ If your using the built/compiled file, you must include `dist/SuperSQL_helper.ph
 
 ```php
 <?php
-$SuperSQL = SQLHelper::connect("localhost","mydb","root","1234"); // mysql
+$SuperSQL = SQLHelper::connect("localhost","root","1234"); // mysql
 
-$SuperSQL = SQLHelper::connect("localhost","mydb","root","1234", $dbtype); // others
+$SuperSQL = SQLHelper::connect("localhost","root","1234", $dbtype); // others
 ?>
 ```
 
@@ -564,79 +692,25 @@ Changes the selected connection
 ## SELECT
 **$SQLHelper->SELECT($table,$columns,$where,$join,$limit/$append)**
 
-The SELECT query
-
-## SELECTMAP
-
-```php
-<?php
-$SQLHelper->SELECTMAP("test",array(
-    "name[username]",
-    "id",
-    "data" => [
-        "admin[is_admin]",
-        "user_posts[posts][json]",
-    ]
-));
-
-/*
-SELECT `name` AS `username`, `id`, `admin` AS `is_admin`, `user_posts` AS `posts` FROM `test`
-
-Output:
-
-[
-    {
-    "username": "admin",
-    "id": 1,
-    "data": [
-        "is_admin": 1,
-        "posts": [
-            {
-            "msg": "DA BAN HAMMER HAS SPOKEN!",
-            "timestamp": 1503011190
-            }
-        ]
-    ]
-    },
-    {
-    "username": "testuser",
-    "id": 2,
-    "data": [
-        "is_admin": 0,
-        "posts": [
-            {
-            "msg": "hello world",
-            "timestamp": 1503011186
-            }
-        ]
-    ]
-    }
-]
-*/
-?>
-```
-
-**$SQLHelper->SELECTMAP($table,$map,$where,$join,$limit/$append)**
-
-The SELECT query for source-mapping.
+The SELECT query. The api is the same as normal SELECT or sSELECT. The helper will choose the most efficient way. (It will choose simple or advanced api based on certain conditions)
 
 ## INSERT
 
 **$SQLHelper->INSERT($table,$data)**
 
-The INSERT query. 
+The INSERT query. The api is the same as normal INSERT or sINSERT. The helper will choose the most efficient way. (It will choose simple or advanced api based on certain conditions)
 
 ## UPDATE
 
 **$SQLHelper->UPDATE($table,$data,$where)**
 
-The UPDATE query.
+The UPDATE query. The api is the same as normal UPDATE or sUPDATE. The helper will choose the most efficient way. (It will choose simple or advanced api based on certain conditions)
 
 ## DELETE
 
 **$SQLHelper->DELETE($table,$where)**
 
-The DELETE query.
+The DELETE query. The api is the same as normal DELETE or sDELETE. The helper will choose the most efficient way. (It will choose simple or advanced api based on certain conditions)
 
 ## REPLACE
 
@@ -723,7 +797,7 @@ Removes a table
 
 * `(String)table` - Table name to delete
 
-# Advanced
+# Super Advanced
 
 ## Transactions
 

@@ -3,12 +3,11 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <link href="images/favicon.ico" rel="icon" type="image/ico" />  
     <meta content="IE=edge,chrome=1" http-equiv="X-UA-Compatible">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <title>SuperSQL</title>
-
-    <style>
+   <style>
       .highlight table td { padding: 5px; }
 .highlight table pre { margin: 0; }
 .highlight .gh {
@@ -264,103 +263,123 @@
                     <a href="#alias" class="toc-h2 toc-link" data-title="Basics">Alias</a>
                   </li>
                   <li>
+                    <a href="#simple" class="toc-h2 toc-link" data-title="Basics">Simple</a>
+                  </li>
+                  <li>
                     <a href="#custom-queries" class="toc-h2 toc-link" data-title="Basics">Custom Queries</a>
                   </li>
               </ul>
           </li>
           <li>
-            <a href="#queries" class="toc-h1 toc-link" data-title="Queries">Queries</a>
+            <a href="#advanced-functions" class="toc-h1 toc-link" data-title="Advanced Functions">Advanced Functions</a>
               <ul class="toc-list-h2">
                   <li>
-                    <a href="#select" class="toc-h2 toc-link" data-title="Queries">SELECT</a>
+                    <a href="#select" class="toc-h2 toc-link" data-title="Advanced Functions">SELECT</a>
                   </li>
                   <li>
-                    <a href="#insert" class="toc-h2 toc-link" data-title="Queries">INSERT</a>
+                    <a href="#insert" class="toc-h2 toc-link" data-title="Advanced Functions">INSERT</a>
                   </li>
                   <li>
-                    <a href="#update" class="toc-h2 toc-link" data-title="Queries">UPDATE</a>
+                    <a href="#update" class="toc-h2 toc-link" data-title="Advanced Functions">UPDATE</a>
                   </li>
                   <li>
-                    <a href="#delete" class="toc-h2 toc-link" data-title="Queries">DELETE</a>
+                    <a href="#delete" class="toc-h2 toc-link" data-title="Advanced Functions">DELETE</a>
                   </li>
               </ul>
           </li>
           <li>
-            <a href="#helper-functions-queries" class="toc-h1 toc-link" data-title="Helper Functions/Queries">Helper Functions/Queries</a>
+            <a href="#simple-functions" class="toc-h1 toc-link" data-title="Simple Functions">Simple Functions</a>
               <ul class="toc-list-h2">
                   <li>
-                    <a href="#sqlhelper-connect" class="toc-h2 toc-link" data-title="Helper Functions/Queries">SQLHelper::connect</a>
+                    <a href="#sselect" class="toc-h2 toc-link" data-title="Simple Functions">sSELECT</a>
                   </li>
                   <li>
-                    <a href="#new-sqlhelper" class="toc-h2 toc-link" data-title="Helper Functions/Queries">new SQLHelper()</a>
+                    <a href="#sinsert" class="toc-h2 toc-link" data-title="Simple Functions">sINSERT</a>
                   </li>
                   <li>
-                    <a href="#change" class="toc-h2 toc-link" data-title="Helper Functions/Queries">Change</a>
+                    <a href="#supdate" class="toc-h2 toc-link" data-title="Simple Functions">sUPDATE</a>
                   </li>
                   <li>
-                    <a href="#getcon" class="toc-h2 toc-link" data-title="Helper Functions/Queries">getCon</a>
-                  </li>
-                  <li>
-                    <a href="#select-2" class="toc-h2 toc-link" data-title="Helper Functions/Queries">SELECT</a>
-                  </li>
-                  <li>
-                    <a href="#selectmap" class="toc-h2 toc-link" data-title="Helper Functions/Queries">SELECTMAP</a>
-                  </li>
-                  <li>
-                    <a href="#insert-2" class="toc-h2 toc-link" data-title="Helper Functions/Queries">INSERT</a>
-                  </li>
-                  <li>
-                    <a href="#update-2" class="toc-h2 toc-link" data-title="Helper Functions/Queries">UPDATE</a>
-                  </li>
-                  <li>
-                    <a href="#delete-2" class="toc-h2 toc-link" data-title="Helper Functions/Queries">DELETE</a>
-                  </li>
-                  <li>
-                    <a href="#replace" class="toc-h2 toc-link" data-title="Helper Functions/Queries">REPLACE</a>
-                  </li>
-                  <li>
-                    <a href="#get" class="toc-h2 toc-link" data-title="Helper Functions/Queries">get</a>
-                  </li>
-                  <li>
-                    <a href="#count" class="toc-h2 toc-link" data-title="Helper Functions/Queries">count</a>
-                  </li>
-                  <li>
-                    <a href="#max" class="toc-h2 toc-link" data-title="Helper Functions/Queries">max</a>
-                  </li>
-                  <li>
-                    <a href="#min" class="toc-h2 toc-link" data-title="Helper Functions/Queries">min</a>
-                  </li>
-                  <li>
-                    <a href="#avg" class="toc-h2 toc-link" data-title="Helper Functions/Queries">avg</a>
-                  </li>
-                  <li>
-                    <a href="#sum" class="toc-h2 toc-link" data-title="Helper Functions/Queries">sum</a>
-                  </li>
-                  <li>
-                    <a href="#create" class="toc-h2 toc-link" data-title="Helper Functions/Queries">create</a>
-                  </li>
-                  <li>
-                    <a href="#drop" class="toc-h2 toc-link" data-title="Helper Functions/Queries">drop</a>
+                    <a href="#sdelete" class="toc-h2 toc-link" data-title="Simple Functions">sDELETE</a>
                   </li>
               </ul>
           </li>
           <li>
-            <a href="#advanced" class="toc-h1 toc-link" data-title="Advanced">Advanced</a>
+            <a href="#helper-functions" class="toc-h1 toc-link" data-title="Helper Functions">Helper Functions</a>
               <ul class="toc-list-h2">
                   <li>
-                    <a href="#transactions" class="toc-h2 toc-link" data-title="Advanced">Transactions</a>
+                    <a href="#sqlhelper-connect" class="toc-h2 toc-link" data-title="Helper Functions">SQLHelper::connect</a>
                   </li>
                   <li>
-                    <a href="#logging" class="toc-h2 toc-link" data-title="Advanced">Logging</a>
+                    <a href="#new-sqlhelper" class="toc-h2 toc-link" data-title="Helper Functions">new SQLHelper()</a>
                   </li>
                   <li>
-                    <a href="#modelock" class="toc-h2 toc-link" data-title="Advanced">modeLock</a>
+                    <a href="#change" class="toc-h2 toc-link" data-title="Helper Functions">Change</a>
+                  </li>
+                  <li>
+                    <a href="#getcon" class="toc-h2 toc-link" data-title="Helper Functions">getCon</a>
+                  </li>
+                  <li>
+                    <a href="#select-2" class="toc-h2 toc-link" data-title="Helper Functions">SELECT</a>
+                  </li>
+                  <li>
+                    <a href="#selectmap" class="toc-h2 toc-link" data-title="Helper Functions">SELECTMAP</a>
+                  </li>
+                  <li>
+                    <a href="#insert-2" class="toc-h2 toc-link" data-title="Helper Functions">INSERT</a>
+                  </li>
+                  <li>
+                    <a href="#update-2" class="toc-h2 toc-link" data-title="Helper Functions">UPDATE</a>
+                  </li>
+                  <li>
+                    <a href="#delete-2" class="toc-h2 toc-link" data-title="Helper Functions">DELETE</a>
+                  </li>
+                  <li>
+                    <a href="#replace" class="toc-h2 toc-link" data-title="Helper Functions">REPLACE</a>
+                  </li>
+                  <li>
+                    <a href="#get" class="toc-h2 toc-link" data-title="Helper Functions">get</a>
+                  </li>
+                  <li>
+                    <a href="#count" class="toc-h2 toc-link" data-title="Helper Functions">count</a>
+                  </li>
+                  <li>
+                    <a href="#max" class="toc-h2 toc-link" data-title="Helper Functions">max</a>
+                  </li>
+                  <li>
+                    <a href="#min" class="toc-h2 toc-link" data-title="Helper Functions">min</a>
+                  </li>
+                  <li>
+                    <a href="#avg" class="toc-h2 toc-link" data-title="Helper Functions">avg</a>
+                  </li>
+                  <li>
+                    <a href="#sum" class="toc-h2 toc-link" data-title="Helper Functions">sum</a>
+                  </li>
+                  <li>
+                    <a href="#create" class="toc-h2 toc-link" data-title="Helper Functions">create</a>
+                  </li>
+                  <li>
+                    <a href="#drop" class="toc-h2 toc-link" data-title="Helper Functions">drop</a>
+                  </li>
+              </ul>
+          </li>
+          <li>
+            <a href="#super-advanced" class="toc-h1 toc-link" data-title="Super Advanced">Super Advanced</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#transactions" class="toc-h2 toc-link" data-title="Super Advanced">Transactions</a>
+                  </li>
+                  <li>
+                    <a href="#logging" class="toc-h2 toc-link" data-title="Super Advanced">Logging</a>
+                  </li>
+                  <li>
+                    <a href="#modelock" class="toc-h2 toc-link" data-title="Super Advanced">modeLock</a>
                   </li>
               </ul>
           </li>
       </div>
         <ul class="toc-footer">
-            <li><a href='https://github.com/ThreeLetters/SuperSQL/archive/master.zip'>Download</a></li>
+            <li><a href='https://github.com/ThreeLetters/SuperSQL/releases/tag/1.0.3'>Download (v1.0.3)</a></li>
             <li><a href='https://github.com/ThreeLetters/SuperSQL/'>Github</a></li>
         </ul>
     </div>
@@ -421,9 +440,13 @@
 
 <p><code>node builder.js</code></p>
 
-<p>It will build to <code>/dist/SuperSQL*.php</code></p>
+<p>It will build to <code>/dist/SuperSQL.php</code></p>
 <h1 id='basics'>Basics</h1>
 <p>These are the basic functionalities of SuperSQL. </p>
+
+<aside class="notice">
+Most of the features listed here are for ADVANCED API. Except for Simple (Simple API) and Responses
+</aside>
 <h2 id='responses'>Responses</h2>
 <blockquote>
 <p>Error handling</p>
@@ -652,13 +675,32 @@ Programming guide: Please try to avoid SQL functions. If you can, use php. (EX:,
 <aside class="notice">
 Aliases go after the key, not before ex: `[alias]key` is WRONG, `key[alias]` is RIGHT
 </aside>
+<h2 id='simple'>Simple</h2>
+<blockquote>
+<p>Simple queries</p>
+</blockquote>
+<pre class="highlight php tab-php"><code><span class="cp">&lt;?php</span>
+<span class="nv">$SuperSQL</span><span class="o">-&gt;</span><span class="na">sSELECT</span><span class="p">(</span><span class="nv">$table</span><span class="p">,</span><span class="nv">$columns</span><span class="p">,</span><span class="nv">$where</span><span class="p">);</span>
+
+<span class="nv">$SuperSQL</span><span class="o">-&gt;</span><span class="na">sINSERT</span><span class="p">(</span><span class="nv">$table</span><span class="p">,</span><span class="nv">$data</span><span class="p">);</span>
+
+<span class="nv">$SuperSQL</span><span class="o">-&gt;</span><span class="na">sUPDATE</span><span class="p">(</span><span class="nv">$table</span><span class="p">,</span><span class="nv">$data</span><span class="p">,</span><span class="nv">$where</span><span class="p">);</span>
+
+<span class="nv">$SuperSQL</span><span class="o">-&gt;</span><span class="na">sDELETE</span><span class="p">(</span><span class="nv">$table</span><span class="p">,</span><span class="nv">$where</span><span class="p">);</span>
+<span class="cp">?&gt;</span>
+</code></pre>
+<p>If you are making simple queries, you may use simple functions to boost performance. Use simple functions by attatching an <code>s</code> in front of the function. The syntax is very similar to SlickInject.</p>
+
+<aside class="success">
+Use simple API as much as you can! It is lightning fast! Otherwise, use the helper functions - they will decide for you.
+</aside>
 <h2 id='custom-queries'>Custom Queries</h2>
 <p>Custom queries can be made using <code>$SuperSQL-&gt;query($query)</code>.</p>
 
 <aside class="notice">
 Programming guide: If you can, use raw queries. For example, theres nothing sensitive in `SELECT * FROM `table`, just do that instead of `$SuperSQL->SELECT("table");`
 </aside>
-<h1 id='queries'>Queries</h1><pre class="highlight php tab-php"><code><span class="cp">&lt;?php</span>
+<h1 id='advanced-functions'>Advanced Functions</h1><pre class="highlight php tab-php"><code><span class="cp">&lt;?php</span>
 <span class="nv">$SuperSQL</span><span class="o">-&gt;</span><span class="na">SELECT</span><span class="p">(</span><span class="nv">$table</span><span class="p">,</span> <span class="nv">$columns</span><span class="p">,</span> <span class="nv">$where</span><span class="p">[,</span><span class="nv">$join</span><span class="p">[,</span> <span class="nv">$limit</span><span class="o">/</span><span class="nv">$append</span><span class="p">);</span>
 
 <span class="nv">$SuperSQL</span><span class="o">-&gt;</span><span class="na">INSERT</span><span class="p">(</span><span class="nv">$table</span><span class="p">,</span> <span class="nv">$data</span><span class="p">);</span>
@@ -668,7 +710,23 @@ Programming guide: If you can, use raw queries. For example, theres nothing sens
 <span class="nx">SuperSQL</span><span class="o">-&gt;</span><span class="na">DELETE</span><span class="p">(</span><span class="nv">$table</span><span class="p">,</span> <span class="nv">$where</span><span class="p">);</span>
 
 <span class="cp">?&gt;</span>
-</code></pre><h2 id='select'>SELECT</h2><pre class="highlight php tab-php"><code><span class="cp">&lt;?php</span>
+</code></pre>
+<p>Advanced functions are for doing advanced queries. Advanced query features include:</p>
+
+<ul>
+<li>Multi-query</li>
+<li>Multi-table querying</li>
+<li>Type Casting</li>
+<li>Aliasing</li>
+<li>Use of operators other than <code>=</code></li>
+<li>Use of &quot;OR&quot;</li>
+<li>Joins</li>
+</ul>
+
+<aside class="notice">
+If your only going to use advanced API, you can just include `dist/SuperSQL_advanced.php` to get SuperSQL with advanced api only.
+</aside>
+<h2 id='select'>SELECT</h2><pre class="highlight php tab-php"><code><span class="cp">&lt;?php</span>
 <span class="nv">$SuperSQL</span><span class="o">-&gt;</span><span class="na">SELECT</span><span class="p">(</span><span class="s2">"horizon"</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[],</span> <span class="k">array</span><span class="p">(</span>
     <span class="c1">// [&gt;&gt;] - Right join
 </span>    <span class="c1">// [&lt;&lt;] - Left join
@@ -755,13 +813,108 @@ You can also use some special operators on the data argument. Example: `$SuperSQ
 <li><code>(String|Array)table</code> - Table(s) to insert to</li>
 <li><code>(Array)where</code> - Conditional statements</li>
 </ul>
-<h1 id='helper-functions-queries'>Helper Functions/Queries</h1>
+<h1 id='simple-functions'>Simple Functions</h1><pre class="highlight php tab-php"><code><span class="cp">&lt;?php</span>
+<span class="c1">// Gets data
+</span><span class="nv">$SuperSQL</span><span class="o">-&gt;</span><span class="na">SELECT</span><span class="p">(</span><span class="nv">$table</span><span class="p">,</span> <span class="nv">$columns</span><span class="p">,</span> <span class="nv">$where</span><span class="p">);</span>
+<span class="c1">// Inserts/adds data to database
+</span><span class="nv">$SuperSQL</span><span class="o">-&gt;</span><span class="na">sINSERT</span><span class="p">(</span><span class="nv">$table</span><span class="p">,</span> <span class="nv">$data</span><span class="p">);</span>
+<span class="c1">// Updates data in database
+</span><span class="nv">$SuperSQL</span><span class="o">-&gt;</span><span class="na">sUPDATE</span><span class="p">(</span><span class="nv">$table</span><span class="p">,</span> <span class="nv">$data</span><span class="p">,</span> <span class="nv">$where</span><span class="p">);</span>
+<span class="c1">// Deletes data in database
+</span><span class="nv">$SuperSQL</span><span class="o">-&gt;</span><span class="na">DELETE</span><span class="p">(</span><span class="nv">$table</span><span class="p">,</span> <span class="nv">$where</span><span class="p">);</span>
+<span class="cp">?&gt;</span>
+</code></pre>
+<p>Simple API is for basic querying. It allows of lightning-fast, simple and easy querying. Unlike the advanced api, you cannot:</p>
+
+<ul>
+<li>You cannot use other opererators besides <code>=</code> (Equal to)</li>
+<li>No binds - Only <code>AND</code> is used</li>
+<li>No multi-querying</li>
+<li>No type casting</li>
+</ul>
+
+<aside class="notice">
+If your only going to use simple API, you can just include `dist/SuperSQL_simple.php` to get SuperSQL with simple api only.
+</aside>
+<h2 id='sselect'>sSELECT</h2>
+<blockquote>
+<p>sSELECT</p>
+</blockquote>
+<pre class="highlight php tab-php"><code><span class="cp">&lt;?php</span>
+<span class="nv">$SuperSQL</span><span class="o">-&gt;</span><span class="na">sSELECT</span><span class="p">(</span><span class="s2">"citizens"</span><span class="p">,[</span><span class="s2">"name"</span><span class="p">,</span><span class="s2">"age"</span><span class="p">],[</span> <span class="c1">// SELECT `name`, `age` FROM `citizens` WHERE `in_trouble` = 1
+</span>    <span class="s2">"in_trouble"</span> <span class="o">=&gt;</span> <span class="mi">1</span>
+<span class="p">]);</span>
+<span class="cp">?&gt;</span>
+</code></pre>
+<p><strong>SuperSQL-&gt;SELECT($table, $columns, $where[, $append);</strong></p>
+
+<ul>
+<li><code>(String)table</code> - Table to query</li>
+<li><code>(Array)columns</code> - Columns to return. <code>[]</code> is <code>*</code></li>
+<li><code>(Array)where</code> - Conditional statements</li>
+<li><code>(String)append</code> - Append to sql (Optional)</li>
+</ul>
+<h2 id='sinsert'>sINSERT</h2>
+<blockquote>
+<p>sINSERT</p>
+</blockquote>
+<pre class="highlight php tab-php"><code><span class="cp">&lt;?php</span>
+<span class="nv">$SuperSQL</span><span class="o">-&gt;</span><span class="na">sINSERT</span><span class="p">(</span><span class="s2">"message_board"</span><span class="p">,</span><span class="k">array</span><span class="p">(</span> <span class="c1">// INSERT INTO `message_board` (`title`, `SuperSQL`) VALUES ('SuperSQL Saves The Day', 'SuperSQL rocks!')
+</span>    <span class="s2">"title"</span> <span class="o">=&gt;</span> <span class="s2">"SuperSQL Saves The Day"</span><span class="p">,</span>
+    <span class="s2">"message"</span> <span class="o">=&gt;</span> <span class="s2">"SuperSQL rocks!"</span>
+<span class="p">));</span>
+<span class="cp">?&gt;</span>
+</code></pre>
+<p><strong>SuperSQL-&gt;sINSERT($table, $data);</strong></p>
+
+<ul>
+<li><code>(String)table</code> - Table to insert to</li>
+<li><code>(Array)data</code> - Data to insert</li>
+</ul>
+<h2 id='supdate'>sUPDATE</h2>
+<blockquote>
+<p>sUPDATE</p>
+</blockquote>
+<pre class="highlight php tab-php"><code><span class="cp">&lt;?php</span>
+<span class="nv">$SuperSQL</span><span class="o">-&gt;</span><span class="na">sUPDATE</span><span class="p">(</span><span class="s2">"developers"</span><span class="p">,[</span> <span class="c1">// UPDATE `developers` SET `is_happy` = 1, `reason` = 'Becaz SuperSQL is awesome!' WHERE `is_happy` = 0
+</span><span class="s2">"is_happy"</span> <span class="o">=&gt;</span> <span class="mi">0</span><span class="p">,</span>
+<span class="p">],[</span>
+<span class="s2">"is_happy"</span> <span class="o">=&gt;</span> <span class="mi">1</span><span class="p">,</span>
+<span class="s2">"reason"</span> <span class="o">=&gt;</span> <span class="s2">"Becaz SuperSQL is awesome!"</span>
+<span class="p">]);</span>
+<span class="cp">?&gt;</span>
+</code></pre>
+<p><strong>SuperSQL-&gt;sUPDATE($table, $data, $where);</strong></p>
+
+<ul>
+<li><code>(String)table</code> - Table to insert to</li>
+<li><code>(Array)data</code> - Data to update</li>
+<li><code>(Array)where</code> - Conditional statements</li>
+</ul>
+<h2 id='sdelete'>sDELETE</h2>
+<blockquote>
+<p>sDELETE</p>
+</blockquote>
+<pre class="highlight php tab-php"><code><span class="cp">&lt;?php</span>
+<span class="nv">$SuperSQL</span><span class="o">-&gt;</span><span class="na">sDELETE</span><span class="p">(</span><span class="s2">"hackers"</span><span class="p">,[</span> <span class="c1">// DELETE FROM `hackers` WHERE `status` = 'Tried to SQL Inject attack a site' AND `encountered` = 'SuperSQL'
+</span>    <span class="s2">"status"</span> <span class="o">=&gt;</span> <span class="s2">"Tried to SQL Inject attack a site"</span><span class="p">,</span>
+    <span class="s2">"encountered"</span> <span class="o">=&gt;</span> <span class="s2">"SuperSQL"</span>
+<span class="p">]);</span>
+<span class="cp">?&gt;</span>
+</code></pre>
+<p><strong>SuperSQL-&gt;DELETE($table, $where);</strong></p>
+
+<ul>
+<li><code>(String)table</code> - Table to insert to</li>
+<li><code>(Array)where</code> - Conditional statements</li>
+</ul>
+<h1 id='helper-functions'>Helper Functions</h1>
 <p>SuperSQL provides some helper functions to allow for easier access. The helper functions allow you to:</p>
 
 <ul>
 <li>Connect easily</li>
 <li>Manage multiple database connections</li>
-<li>Other queries</li>
+<li>Do queries more efficiently</li>
 </ul>
 
 <aside class="notice">
@@ -868,7 +1021,7 @@ If your using the built/compiled file, you must include `dist/SuperSQL_helper.ph
 <h2 id='select-2'>SELECT</h2>
 <p><strong>$SQLHelper-&gt;SELECT($table,$columns,$where,$join,$limit/$append)</strong></p>
 
-<p>The SELECT query</p>
+<p>The SELECT query. The api is the same as normal SELECT or sSELECT. The helper will choose the most efficient way. (It will choose simple or advanced api based on certain conditions)</p>
 <h2 id='selectmap'>SELECTMAP</h2><pre class="highlight php tab-php"><code><span class="cp">&lt;?php</span>
 <span class="nv">$SQLHelper</span><span class="o">-&gt;</span><span class="na">SELECTMAP</span><span class="p">(</span><span class="s2">"test"</span><span class="p">,</span><span class="k">array</span><span class="p">(</span>
     <span class="s2">"name[username]"</span><span class="p">,</span>
@@ -921,15 +1074,15 @@ Output:
 <h2 id='insert-2'>INSERT</h2>
 <p><strong>$SQLHelper-&gt;INSERT($table,$data)</strong></p>
 
-<p>The INSERT query. </p>
+<p>The INSERT query. The api is the same as normal INSERT or sINSERT. The helper will choose the most efficient way. (It will choose simple or advanced api based on certain conditions)</p>
 <h2 id='update-2'>UPDATE</h2>
 <p><strong>$SQLHelper-&gt;UPDATE($table,$data,$where)</strong></p>
 
-<p>The UPDATE query.</p>
+<p>The UPDATE query. The api is the same as normal UPDATE or sUPDATE. The helper will choose the most efficient way. (It will choose simple or advanced api based on certain conditions)</p>
 <h2 id='delete-2'>DELETE</h2>
 <p><strong>$SQLHelper-&gt;DELETE($table,$where)</strong></p>
 
-<p>The DELETE query.</p>
+<p>The DELETE query. The api is the same as normal DELETE or sDELETE. The helper will choose the most efficient way. (It will choose simple or advanced api based on certain conditions)</p>
 <h2 id='replace'>REPLACE</h2><pre class="highlight php tab-php"><code><span class="cp">&lt;?php</span>
 <span class="nv">$SQLHelper</span><span class="o">-&gt;</span><span class="na">REPLACE</span><span class="p">(</span><span class="s2">"luggage"</span><span class="p">,[</span>
     <span class="s2">"items"</span><span class="o">=&gt;</span><span class="k">array</span><span class="p">(</span><span class="s2">"bomb"</span><span class="o">=&gt;</span><span class="s2">"pillow"</span><span class="p">,</span><span class="s2">"poison"</span><span class="o">=&gt;</span><span class="s2">"perfume"</span><span class="p">)</span>
@@ -996,7 +1149,7 @@ Output:
 <ul>
 <li><code>(String)table</code> - Table name to delete</li>
 </ul>
-<h1 id='advanced'>Advanced</h1><h2 id='transactions'>Transactions</h2><pre class="highlight php tab-php"><code><span class="cp">&lt;?php</span>
+<h1 id='super-advanced'>Super Advanced</h1><h2 id='transactions'>Transactions</h2><pre class="highlight php tab-php"><code><span class="cp">&lt;?php</span>
 <span class="nv">$SuperSQL</span><span class="o">-&gt;</span><span class="na">transact</span><span class="p">(</span><span class="k">function</span> <span class="p">()</span> <span class="p">{</span>
 
 <span class="nv">$SuperSQL</span><span class="o">-&gt;</span><span class="na">DELETE</span><span class="p">(</span><span class="s2">"citizens"</span><span class="p">,[</span>

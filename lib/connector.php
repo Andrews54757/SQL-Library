@@ -52,7 +52,7 @@ class Response implements \ArrayAccess, \Iterator
     {
         if ($mode === 0) { // fetch all
             $outtypes = $this->outTypes;
-            $d        = $data->fetchAll();
+            $d        = $data->fetchAll(\PDO::FETCH_ASSOC);
             if ($outtypes) {
                 foreach ($d as $i => &$row) {
                     $this->map($row, $outtypes);
@@ -75,7 +75,7 @@ class Response implements \ArrayAccess, \Iterator
     }
     private function fetchNextRow()
     {
-        $row = $this->stmt->fetch();
+        $row = $this->stmt->fetch(\PDO::FETCH_ASSOC);
         if ($row) {
             if ($this->outTypes) {
                 $this->map($row, $this->outTypes);

@@ -65,7 +65,7 @@ class Parser
         if (is_int($val)) {
             return (int) $val;
         } else {
-            return self::quote($val);
+            return '\'' . $val . '\''; // NOT SAFE!! Use PDO->Quote in future
         }
     }
     /**
@@ -164,6 +164,12 @@ class Parser
             return '`' . $matches[1] . '`';
         }
     }
+    
+    static function quoteArray(&$arr) {
+        foreach ($arr as &$v) {
+            $v = self::quote($v);
+        }
+    }
     /**
      * Forms the table
      *
@@ -214,7 +220,7 @@ class Parser
         } else if ($var === 'json') {
             $dtype = 5;
             $value = json_encode($value);
-        } else if ($var === 'obj') {
+        } else if ($var === 'obj' || $var === 'object') {
             $dtype = 6;
             $value = serialize($value);
         } else {
@@ -393,7 +399,7 @@ class Parser
         };
         return $build($build, $dt, $map, $index, $values);
     }
-    static function JOIN($join, &$sql)
+    static function JOIN($join, &$sql,&$values,&$i)
     {
         foreach ($join as $key => &$val) {
             if ($key[0] === '#') {
@@ -413,6 +419,9 @@ class Parser
                 case '<>':
                     $sql .= ' FULL JOIN ';
                     break;
+                case '>~':
+                    $sql .= ' LEFT OUTER JOIN ';
+                    break;
                 default: // inner join
                     $sql .= ' JOIN ';
                     break;
@@ -421,7 +430,7 @@ class Parser
             if ($raw) {
                 $sql .= $val;
             } else {
-                $sql .= self::conditions($val);
+                $sql .= self::conditions($val, $values, $f, $i);
             }
         }
     }
@@ -445,8 +454,16 @@ class Parser
             }
         }
         if (isset($columns[0])) { // has var
+            if ($columns[0] === '*') {
+                array_splice($columns, 0, 1);
+                $sql .= '*';
+                foreach ($columns as $i => &$val) {
+                    preg_match('/(?<column>[a-zA-Z0-9_\.]*)(?:\[(?<type>[^\]]*)\])?/',$val,$match);
+                    $outTypes[$match['column']] = $match['type'];
+                }
+            } else {
             foreach ($columns as $i => &$val) {
-                preg_match('/(?<column>[a-zA-Z0-9_\.]*)(?:\[(?<alias>[^\]]*)\])?(?:\[(?<type>.*)\])?/', $val, $match); // 8 steps
+                preg_match('/(?<column>[a-zA-Z0-9_\.]*)(?:\[(?<alias>[^\]]*)\])?(?:\[(?<type>[^\]]*)\])?/', $val, $match); // 8 steps
                 //     echo json_encode($match);
                 $val   = $match["column"];
                 $alias = false;
@@ -474,6 +491,7 @@ class Parser
                 if ($alias)
                     $sql .= ' AS `' . $alias . '`';
             }
+            }
         } else
             $sql .= '*';
         $sql .= $into;
@@ -495,6 +513,8 @@ class Parser
         $values   = array();
         $insert   = array();
         $outTypes = null;
+        $i = 0;
+
         if (!isset($columns[0])) { // none
             $sql .= '*';
         } else { // some
@@ -502,16 +522,16 @@ class Parser
         }
         $sql .= ' FROM ' . self::table($table);
         if ($join) {
-            self::JOIN($join, $sql);
+            self::JOIN($join, $sql, $values, $i);
         }
         if (!empty($where)) {
             $sql .= ' WHERE ';
-            $index = array();
             if (isset($where[0])) {
-                $sql .= self::conditions($where[0], $values, $index);
+                $index = array();
+                $sql .= self::conditions($where[0], $values, $index,$i);
                 self::append2($insert, $index, $where, $values);
             } else {
-                $sql .= self::conditions($where, $values, $index);
+                $sql .= self::conditions($where, $values);
             }
         }
         if ($limit) {
@@ -519,6 +539,35 @@ class Parser
                 $sql .= ' LIMIT ' . $limit;
             } else if (is_string($limit)) {
                 $sql .= ' ' . $limit;
+            } else if (is_array($limit)) {
+                if (isset($limit[0])) {
+                    $sql .= ' LIMIT ' . (int)$limit[0] . ' OFFSET ' . (int)$limit[1];
+                } else {
+                    
+                    if (isset($limit['GROUP'])) {
+                        $sql .= ' GROUP BY ';
+                        if (is_string($limit['GROUP'])) {
+                            $sql .= self::quote($limit['GROUP']);
+                        } else {
+                            self::quoteArray($limit['GROUP']);
+                            $sql .= implode(', ',$limit['GROUP']);
+                        }
+                        if (isset($limit['HAVING'])) {
+                            $sql .= ' HAVING ' . (is_string($limit['HAVING']) ? $limit['HAVING'] : self::conditions($limit['HAVING'], $values, $f, $i)); 
+                       
+                        }
+                    }
+                    if (isset($limit['ORDER'])) {
+                        $sql .= ' ORDER BY ' . self::quote($limit['ORDER']);
+                    }
+                    if (isset($limit['LIMIT'])) {
+                        $sql .= ' LIMIT ' . (int)$limit['LIMIT'];
+                    }
+                    
+                    if (isset($limit['OFFSET'])) {
+                        $sql .= ' OFFSET ' . (int)$limit['OFFSET'];
+                    }
+                }
             }
         }
         return array(
@@ -657,7 +706,7 @@ class Parser
                 $sql .= self::conditions($where[0], $values, $index, $i);
                 self::append2($insert, $index, $where, $values);
             } else {
-                $sql .= self::conditions($where, $values, $index, $i);
+                $sql .= self::conditions($where, $values, $f, $i);
             }
         }
         return array(
@@ -686,7 +735,7 @@ class Parser
                 $sql .= self::conditions($where[0], $values, $index);
                 self::append2($insert, $index, $where, $values);
             } else {
-                $sql .= self::conditions($where, $values, $index);
+                $sql .= self::conditions($where, $values);
             }
         }
         return array(

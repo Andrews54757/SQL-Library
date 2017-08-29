@@ -250,9 +250,10 @@ class SQLHelper
     }
     function sqBase($sql, $where, $join)
     {
+        $i = 0;
         $values = array();
         if ($join) {
-            Parser::JOIN($join, $sql);
+            Parser::JOIN($join, $sql, $values, $i);
         }
         if (count($where) != 0) {
             $sql .= ' WHERE ';

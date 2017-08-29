@@ -54,7 +54,7 @@ class SuperSQL
      */
     function SELECT($table, $columns = array(), $where = array(), $join = null, $limit = false)
     {
-        if ((is_int($join) || is_string($join)) && !$limit) {
+        if ((is_int($join) || is_string($join) || isset($join[0])) && !$limit) {
             $limit = $join;
             $join  = null;
         }

@@ -164,8 +164,8 @@ class Parser
             return '`' . $matches[1] . '`';
         }
     }
-    
-    static function quoteArray(&$arr) {
+    static function quoteArray(&$arr)
+    {
         foreach ($arr as &$v) {
             $v = self::quote($v);
         }
@@ -348,7 +348,6 @@ class Parser
                         if ($between) {
                             $index += 2;
                             $sql .= $column . ($arg === '<>' ? 'NOT' : '') . ' BETWEEN ';
-                            
                             if ($raw) {
                                 $sql .= $val[0] . ' AND ' . $val[1];
                             } else if ($values !== false) {
@@ -399,7 +398,7 @@ class Parser
         };
         return $build($build, $dt, $map, $index, $values);
     }
-    static function JOIN($join, &$sql,&$values,&$i)
+    static function JOIN($join, &$sql, &$values, &$i)
     {
         foreach ($join as $key => &$val) {
             if ($key[0] === '#') {
@@ -458,39 +457,39 @@ class Parser
                 array_splice($columns, 0, 1);
                 $sql .= '*';
                 foreach ($columns as $i => &$val) {
-                    preg_match('/(?<column>[a-zA-Z0-9_\.]*)(?:\[(?<type>[^\]]*)\])?/',$val,$match);
+                    preg_match('/(?<column>[a-zA-Z0-9_\.]*)(?:\[(?<type>[^\]]*)\])?/', $val, $match);
                     $outTypes[$match['column']] = $match['type'];
                 }
             } else {
-            foreach ($columns as $i => &$val) {
-                preg_match('/(?<column>[a-zA-Z0-9_\.]*)(?:\[(?<alias>[^\]]*)\])?(?:\[(?<type>[^\]]*)\])?/', $val, $match); // 8 steps
-                //     echo json_encode($match);
-                $val   = $match["column"];
-                $alias = false;
-                if (isset($match["alias"])) { // name[alias][type]
-                    $alias = $match["alias"];
-                    if (isset($match["type"])) {
-                        $type = $match["type"];
-                    } else {
-                        if ($alias === "json" || $alias === "obj" || $alias === "int" || $alias === "string" || $alias === "bool") {
-                            $type  = $alias;
-                            $alias = false;
-                        } else
-                            $type = false;
+                foreach ($columns as $i => &$val) {
+                    preg_match('/(?<column>[a-zA-Z0-9_\.]*)(?:\[(?<alias>[^\]]*)\])?(?:\[(?<type>[^\]]*)\])?/', $val, $match); // 8 steps
+                    //     echo json_encode($match);
+                    $val   = $match["column"];
+                    $alias = false;
+                    if (isset($match["alias"])) { // name[alias][type]
+                        $alias = $match["alias"];
+                        if (isset($match["type"])) {
+                            $type = $match["type"];
+                        } else {
+                            if ($alias === "json" || $alias === "obj" || $alias === "int" || $alias === "string" || $alias === "bool") {
+                                $type  = $alias;
+                                $alias = false;
+                            } else
+                                $type = false;
+                        }
+                        if ($type) {
+                            if (!$outTypes)
+                                $outTypes = array();
+                            $outTypes[$alias ? $alias : $val] = $type;
+                        }
                     }
-                    if ($type) {
-                        if (!$outTypes)
-                            $outTypes = array();
-                        $outTypes[$alias ? $alias : $val] = $type;
+                    if ($i != 0) {
+                        $sql .= ', ';
                     }
+                    $sql .= self::quote($val);
+                    if ($alias)
+                        $sql .= ' AS `' . $alias . '`';
                 }
-                if ($i != 0) {
-                    $sql .= ', ';
-                }
-                $sql .= self::quote($val);
-                if ($alias)
-                    $sql .= ' AS `' . $alias . '`';
-            }
             }
         } else
             $sql .= '*';
@@ -513,8 +512,7 @@ class Parser
         $values   = array();
         $insert   = array();
         $outTypes = null;
-        $i = 0;
-
+        $i        = 0;
         if (!isset($columns[0])) { // none
             $sql .= '*';
         } else { // some
@@ -528,7 +526,7 @@ class Parser
             $sql .= ' WHERE ';
             if (isset($where[0])) {
                 $index = array();
-                $sql .= self::conditions($where[0], $values, $index,$i);
+                $sql .= self::conditions($where[0], $values, $index, $i);
                 self::append2($insert, $index, $where, $values);
             } else {
                 $sql .= self::conditions($where, $values);
@@ -541,31 +539,28 @@ class Parser
                 $sql .= ' ' . $limit;
             } else if (is_array($limit)) {
                 if (isset($limit[0])) {
-                    $sql .= ' LIMIT ' . (int)$limit[0] . ' OFFSET ' . (int)$limit[1];
+                    $sql .= ' LIMIT ' . (int) $limit[0] . ' OFFSET ' . (int) $limit[1];
                 } else {
-                    
                     if (isset($limit['GROUP'])) {
                         $sql .= ' GROUP BY ';
                         if (is_string($limit['GROUP'])) {
                             $sql .= self::quote($limit['GROUP']);
                         } else {
                             self::quoteArray($limit['GROUP']);
-                            $sql .= implode(', ',$limit['GROUP']);
+                            $sql .= implode(', ', $limit['GROUP']);
                         }
                         if (isset($limit['HAVING'])) {
-                            $sql .= ' HAVING ' . (is_string($limit['HAVING']) ? $limit['HAVING'] : self::conditions($limit['HAVING'], $values, $f, $i)); 
-                       
+                            $sql .= ' HAVING ' . (is_string($limit['HAVING']) ? $limit['HAVING'] : self::conditions($limit['HAVING'], $values, $f, $i));
                         }
                     }
                     if (isset($limit['ORDER'])) {
                         $sql .= ' ORDER BY ' . self::quote($limit['ORDER']);
                     }
                     if (isset($limit['LIMIT'])) {
-                        $sql .= ' LIMIT ' . (int)$limit['LIMIT'];
+                        $sql .= ' LIMIT ' . (int) $limit['LIMIT'];
                     }
-                    
                     if (isset($limit['OFFSET'])) {
-                        $sql .= ' OFFSET ' . (int)$limit['OFFSET'];
+                        $sql .= ' OFFSET ' . (int) $limit['OFFSET'];
                     }
                 }
             }

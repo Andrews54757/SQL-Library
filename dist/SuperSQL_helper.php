@@ -3,8 +3,8 @@
  Author: Andrews54757
  License: MIT (https://github.com/ThreeLetters/SuperSQL/blob/master/LICENSE)
  Source: https://github.com/ThreeLetters/SQL-Library
- Build: v1.0.6
- Built on: 27/08/2017
+ Build: v1.0.61
+ Built on: 29/08/2017
 */
 
 namespace SuperSQL;
@@ -199,9 +199,10 @@ class SQLHelper
     }
     function sqBase($sql, $where, $join)
     {
+        $i = 0;
         $values = array();
         if ($join) {
-            Parser::JOIN($join, $sql);
+            Parser::JOIN($join, $sql, $values, $i);
         }
         if (count($where) != 0) {
             $sql .= ' WHERE ';

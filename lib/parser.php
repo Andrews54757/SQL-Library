@@ -602,18 +602,19 @@ class Parser
                 $sql .= ', ';
                 $append .= ', ';
             }
-            preg_match('/(?<out>[^\#\[]*)(?:#[^[]*)?(?:\[(?<type>[^]]*)\])?/', $key, $matches);
-            $key  = $matches["out"];
-            $type = isset($matches["type"]) ? $matches["type"] : false;
+            preg_match('/(?<out>[^\[]*)(?:\[(?<type>[^]]*)\])?/', $key, $matches);
+            $key = $matches["out"];
             $sql .= '`' . $key . '`';
             if ($raw) {
                 $append .= $val;
             } else {
+                $type = isset($matches["type"]) ? $matches["type"] : false;
                 $append .= '?';
-                array_push($values, self::value($type, $val));
+                $m2 = (!$type || ($type !== 'json' && $type !== 'obj')) && is_array($val);
+                array_push($values, self::value($type, $m2 ? $val[0] : $val));
                 if ($multi) {
                     $indexes[$key] = $i++;
-                } else {
+                } else if ($m2) {
                     self::append($insert, $val, $i++, $values);
                 }
             }
@@ -683,10 +684,11 @@ class Parser
                     }
                 }
                 $type = isset($matches["type"]) ? $matches["type"] : false;
-                array_push($values, self::value($type, $val));
+                $m2   = (!$type || ($type !== 'json' && $type !== 'obj')) && is_array($val);
+                array_push($values, self::value($type, $m2 ? $val[0] : $val));
                 if ($multi) {
                     $indexes[$key] = $i++;
-                } else {
+                } else if ($m2) {
                     self::append($insert, $val, $i++, $values);
                 }
             }

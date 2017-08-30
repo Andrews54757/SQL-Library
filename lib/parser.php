@@ -36,12 +36,20 @@ class Parser
     static function getArg(&$str)
     {
         preg_match('/^(?:\[(?<a>.{2})\])(?<out>.*)/', $str, $m);
-        if (isset($m["a"])) {
-            $str = $m["out"];
-            return $m["a"];
+        if (isset($m['a'])) {
+            $str = $m['out'];
+            return $m['a'];
         } else {
             return false;
         }
+    }
+    static function isRaw(&$key)
+    {
+        if ($key[0] === '#') {
+            $key = substr($key, 1);
+            return true;
+        }
+        return false;
     }
     /**
      * Appends value(s) to arguments
@@ -68,6 +76,37 @@ class Parser
             return '\'' . $val . '\''; // NOT SAFE!! Use PDO->Quote in future
         }
     }
+    static function escape2($val, $dt)
+    {
+        switch ($dt[2]) {
+            case 0: //Bool
+                return $val ? '1' : '0';
+                break;
+            case 1: // int
+                return (int) $val;
+                break;
+            case 2: // string
+                return (string) $val;
+                break;
+            case 3: // lob
+                return $val;
+                break;
+            case 4: // null
+                return null;
+                break;
+            case 5: // json
+                return json_encode($val);
+                break;
+            case 6: // seriealise
+                return serialize($val);
+                break;
+        }
+    }
+    static function stripArgs(&$key)
+    {
+        preg_match('/(?:\[.{2}\]){0,2}([^\[]*)/', $key, $matches); // 13 steps
+        return $matches[1];
+    }
     /**
      * Appends values to arguments
      *
@@ -77,75 +116,42 @@ class Parser
      */
     static function append2(&$insert, $indexes, $dt, $values)
     {
-        function stripArgs(&$key)
-        {
-            preg_match('/(?:\[.{2}\]){0,2}([^\[]*)/', $key, $matches); // 13 steps
-            return $matches[1];
-        }
-        function escape($val, $dt)
-        {
-            if (!isset($dt[2]))
-                return $val;
-            switch ($dt[2]) {
-                case 0: //Bool
-                    return $val ? '1' : '0';
-                    break;
-                case 1: // int
-                    return (int) $val;
-                    break;
-                case 2: // string
-                    return (string) $val;
-                    break;
-                case 3: // lob
-                    return $val;
-                    break;
-                case 4: // null
-                    return null;
-                    break;
-                case 5: // json
-                    return json_encode($val);
-                    break;
-                case 6: // seriealise
-                    return serialize($val);
-                    break;
-            }
-        }
-        function recurse(&$holder, $val, $indexes, $par, $values)
-        {
-            foreach ($val as $k => &$v) {
-                if ($k[0] === "#")
-                    continue;
-                stripArgs($k);
-                $k1 = $k . '#' . $par;
-                if (isset($indexes[$k1]))
-                    $d = $indexes[$k1];
-                else
-                    $d = $indexes[$k];
-                $isArr = is_array($v) && (!isset($values[$d][2]) || $values[$d][2] < 5);
-                if ($isArr) {
-                    if (isset($v[0])) {
-                        foreach ($v as $i => &$j) {
-                            $a = $d + $i;
-                            if (isset($holder[$a]))
-                                trigger_error('Key collision: ' . $k, E_USER_WARNING);
-                            $holder[$a] = escape($j, $values[$a]);
-                        }
-                    } else {
-                        recurse($holder, $v, $indexes, $par . '/' . $k, $values);
-                    }
-                } else {
-                    if (isset($holder[$d]))
-                        trigger_error('Key collision: ' . $k, E_USER_WARNING);
-                    $holder[$d] = escape($v, $values[$d]);
-                }
-            }
-        }
         $len = count($dt);
         for ($key = 1; $key < $len; $key++) {
             $val = $dt[$key];
             if (!isset($insert[$key - 1]))
                 $insert[$key - 1] = array();
-            recurse($insert[$key - 1], $val, $indexes, '', $values);
+            self::recurse($insert[$key - 1], $val, $indexes, '', $values);
+        }
+    }
+    private static function recurse(&$holder, $val, $indexes, $par, $values)
+    {
+        foreach ($val as $k => &$v) {
+            if ($k[0] === '#')
+                continue;
+            self::stripArgs($k);
+            $k1 = $k . '#' . $par;
+            if (isset($indexes[$k1]))
+                $d = $indexes[$k1];
+            else
+                $d = $indexes[$k];
+            $isArr = is_array($v) && (!isset($values[$d][2]) || $values[$d][2] < 5);
+            if ($isArr) {
+                if (isset($v[0])) {
+                    foreach ($v as $i => &$j) {
+                        $a = $d + $i;
+                        if (isset($holder[$a]))
+                            trigger_error('Key collision: ' . $k, E_USER_WARNING);
+                        $holder[$a] = self::escape2($j, $values[$a]);
+                    }
+                } else {
+                    self::recurse($holder, $v, $indexes, $par . '/' . $k, $values);
+                }
+            } else {
+                if (isset($holder[$d]))
+                    trigger_error('Key collision: ' . $k, E_USER_WARNING);
+                $holder[$d] = self::escape2($v, $values[$d]);
+            }
         }
     }
     /**
@@ -235,16 +241,9 @@ class Parser
     }
     static function getType(&$str)
     {
-        if (isset($str[1]) && $str[strlen($str) - 1] === ']') {
-            $start = strrpos($str, '[');
-            if ($start === false) {
-                return '';
-            }
-            $out = substr($str, $start + 1, -1);
-            $str = substr($str, 0, $start);
-            return $out;
-        } else
-            return '';
+        preg_match('/(?<out>[^\[]*)(?:\[(?<a>[^\]]*)\])?/', $str, $m);
+        $str = $m['out'];
+        return isset($m['a']) ? $m['a'] : false;
     }
     static function rmComments($str)
     {
@@ -259,154 +258,140 @@ class Parser
      *
      * @returns {String}
      */
-    static function conditions($dt, &$values = false, &$map = false, &$index = 0)
+    static function conditions($dt, &$values = false, &$map = false, &$index = 0, $join = ' AND ', $operator = ' = ', $parent = '')
     {
-        $build = function(&$build, $dt, &$map, &$index, &$values, $join = ' AND ', $operator = ' = ', $parent = '')
-        {
-            $num = 0;
-            $sql = '';
-            foreach ($dt as $key => &$val) {
-                if ($key[0] === '#') {
-                    $raw = true;
-                    $key = substr($key, 1);
-                } else {
-                    $raw = false;
-                }
-                preg_match('/^(?:\[(?<a>.{2})\])(?:\[(?<b>.{2})\])?(?<out>.*)/', $key, $matches); // 14 steps
-                if (isset($matches["a"])) {
-                    $arg  = $matches["a"];
-                    $key  = $matches["out"];
-                    $arg2 = isset($matches["b"]) ? $matches["b"] : false;
-                } else {
-                    $arg = false;
-                }
-                $useBind     = !isset($val[0]);
-                $newJoin     = $join;
-                $newOperator = $operator;
-                $type        = $raw ? false : self::getType($key);
-                $arr         = is_array($val) && $type !== 'json' && $type !== 'obj';
-                if ($arg && ($arg === '||' || $arg === '&&')) {
-                    $newJoin = ($arg === '||') ? ' OR ' : ' AND ';
-                    $arg     = $arg2;
-                    if ($arr && $arg && ($arg === '||' || $arg === '&&')) {
-                        $join    = $newJoin;
-                        $newJoin = ($arg === '||') ? ' OR ' : ' AND ';
-                        $arg     = self::getArg($key);
-                    }
-                }
-                $between = false;
-                if ($arg && $arg !== "==") {
-                    switch ($arg) { // different conditionals
-                        case '!=':
-                            $newOperator = ' != ';
-                            break;
-                        case '>>':
-                            $newOperator = ' > ';
-                            break;
-                        case '<<':
-                            $newOperator = ' < ';
-                            break;
-                        case '>=':
-                            $newOperator = ' >= ';
-                            break;
-                        case '<=':
-                            $newOperator = ' <= ';
-                            break;
-                        case '~~':
-                            $newOperator = ' LIKE ';
-                            break;
-                        case '!~':
-                            $newOperator = ' NOT LIKE ';
-                            break;
-                        default:
-                            if ($arg !== '><' && $arg !== '<>')
-                                throw new \Exception("Invalid operator " . $arg . " Available: ==,!=,>>,<<,>=,<=,~~,!~,<>,><");
-                            else
-                                $between = true;
-                            break;
-                    }
-                } else {
-                    if (!$useBind || $arg === '==')
-                        $newOperator = ' = '; // reset
-                }
-                if (!$arr)
-                    $join = $newJoin;
-                if ($num !== 0)
-                    $sql .= $join;
-                $column = self::rmComments($key);
-                if (!$raw)
-                    $column = self::quote($column);
-                if ($arr) {
-                    $sql .= '(';
-                    if ($useBind) {
-                        $sql .= $build($build, $val, $map, $index, $values, $newJoin, $newOperator, $parent . '/' . $key);
-                    } else {
-                        if ($map !== false && !$raw) {
-                            $map[$key]                 = $index;
-                            $map[$key . '#' . $parent] = $index++;
-                        }
-                        if ($between) {
-                            $index += 2;
-                            $sql .= $column . ($arg === '<>' ? 'NOT' : '') . ' BETWEEN ';
-                            if ($raw) {
-                                $sql .= $val[0] . ' AND ' . $val[1];
-                            } else if ($values !== false) {
-                                $sql .= '? AND ?';
-                                array_push($values, self::value($type, $val[0]));
-                                array_push($values, self::value($type, $val[1]));
-                            } else {
-                                $sql .= self::escape($val[0]) . ' AND ' . self::escape($val[1]);
-                            }
-                        } else {
-                            foreach ($val as $k => &$v) {
-                                if ($k !== 0)
-                                    $sql .= $newJoin;
-                                $index++;
-                                $sql .= $column . $newOperator;
-                                if ($raw) {
-                                    $sql .= $v;
-                                } else if ($values !== false) {
-                                    $sql .= '?';
-                                    array_push($values, self::value($type, $v));
-                                } else {
-                                    $sql .= self::escape($v);
-                                }
-                            }
-                        }
-                        $sql .= ')';
-                    }
-                } else {
-                    $sql .= $column . $newOperator;
-                    if ($raw) {
-                        $sql .= $val;
-                    } else {
-                        if ($values !== false) {
-                            $sql .= '?';
-                            array_push($values, self::value($type, $val));
-                        } else {
-                            $sql .= self::escape($val);
-                        }
-                        if ($map !== false) {
-                            $map[$key]                 = $index;
-                            $map[$key . '#' . $parent] = $index++;
-                        }
-                    }
-                }
-                $num++;
+        $num = 0;
+        $sql = '';
+        foreach ($dt as $key => &$val) {
+            preg_match('^(?<r>\#)?(?:\[(?<a>.{2})\])(?:\[(?<b>.{2})\])?(?<out>.*)', $key, $matches); // 14 steps
+            $raw = isset($matches['r']);
+            if (isset($matches['a'])) {
+                $arg  = $matches['a'];
+                $key  = $matches['out'];
+                $arg2 = isset($matches['b']) ? $matches['b'] : false;
+            } else {
+                $arg = false;
             }
-            return $sql;
-        };
-        return $build($build, $dt, $map, $index, $values);
+            $useBind     = !isset($val[0]);
+            $newJoin     = $join;
+            $newOperator = $operator;
+            $type        = $raw ? false : self::getType($key);
+            $arr         = is_array($val) && $type !== 'json' && $type !== 'obj';
+            if ($arg && ($arg === '||' || $arg === '&&')) {
+                $newJoin = ($arg === '||') ? ' OR ' : ' AND ';
+                $arg     = $arg2;
+                if ($arr && $arg && ($arg === '||' || $arg === '&&')) {
+                    $join    = $newJoin;
+                    $newJoin = ($arg === '||') ? ' OR ' : ' AND ';
+                    $arg     = self::getArg($key);
+                }
+            }
+            $between = false;
+            if ($arg && $arg !== '==') {
+                switch ($arg) { // different conditionals
+                    case '!=':
+                        $newOperator = ' != ';
+                        break;
+                    case '>>':
+                        $newOperator = ' > ';
+                        break;
+                    case '<<':
+                        $newOperator = ' < ';
+                        break;
+                    case '>=':
+                        $newOperator = ' >= ';
+                        break;
+                    case '<=':
+                        $newOperator = ' <= ';
+                        break;
+                    case '~~':
+                        $newOperator = ' LIKE ';
+                        break;
+                    case '!~':
+                        $newOperator = ' NOT LIKE ';
+                        break;
+                    default:
+                        if ($arg !== '><' && $arg !== '<>')
+                            throw new \Exception('Invalid operator ' . $arg . ' Available: ==,!=,>>,<<,>=,<=,~~,!~,<>,><');
+                        else
+                            $between = true;
+                        break;
+                }
+            } else {
+                if (!$useBind || $arg === '==')
+                    $newOperator = ' = '; // reset
+            }
+            if (!$arr)
+                $join = $newJoin;
+            if ($num !== 0)
+                $sql .= $join;
+            $column = self::rmComments($key);
+            if (!$raw)
+                $column = self::quote($column);
+            if ($arr) {
+                $sql .= '(';
+                if ($useBind) {
+                    $sql .= self::conditions($val, $values, $map, $index, $newJoin, $newOperator, $parent . '/' . $key);
+                } else {
+                    if ($map !== false && !$raw) {
+                        $map[$key]                 = $index;
+                        $map[$key . '#' . $parent] = $index++;
+                    }
+                    if ($between) {
+                        $index += 2;
+                        $sql .= $column . ($arg === '<>' ? 'NOT' : '') . ' BETWEEN ';
+                        if ($raw) {
+                            $sql .= $val[0] . ' AND ' . $val[1];
+                        } else if ($values !== false) {
+                            $sql .= '? AND ?';
+                            array_push($values, self::value($type, $val[0]));
+                            array_push($values, self::value($type, $val[1]));
+                        } else {
+                            $sql .= self::escape($val[0]) . ' AND ' . self::escape($val[1]);
+                        }
+                    } else {
+                        foreach ($val as $k => &$v) {
+                            if ($k !== 0)
+                                $sql .= $newJoin;
+                            ++$index;
+                            $sql .= $column . $newOperator;
+                            if ($raw) {
+                                $sql .= $v;
+                            } else if ($values !== false) {
+                                $sql .= '?';
+                                array_push($values, self::value($type, $v));
+                            } else {
+                                $sql .= self::escape($v);
+                            }
+                        }
+                    }
+                }
+                $sql .= ')';
+            } else {
+                $sql .= $column . $newOperator;
+                if ($raw) {
+                    $sql .= $val;
+                } else {
+                    if ($values !== false) {
+                        $sql .= '?';
+                        array_push($values, self::value($type, $val));
+                    } else {
+                        $sql .= self::escape($val);
+                    }
+                    if ($map !== false) {
+                        $map[$key]                 = $index;
+                        $map[$key . '#' . $parent] = $index++;
+                    }
+                }
+            }
+            ++$num;
+        }
+        return $sql;
     }
     static function JOIN($join, &$sql, &$values, &$i)
     {
         foreach ($join as $key => &$val) {
-            if ($key[0] === '#') {
-                $raw = true;
-                $key = substr($key, 1);
-            } else {
-                $raw = false;
-            }
+            $raw = self::isRaw($key);
             $arg = self::getArg($key);
             switch ($arg) {
                 case '<<':
@@ -464,14 +449,14 @@ class Parser
                 foreach ($columns as $i => &$val) {
                     preg_match('/(?<column>[a-zA-Z0-9_\.]*)(?:\[(?<alias>[^\]]*)\])?(?:\[(?<type>[^\]]*)\])?/', $val, $match); // 8 steps
                     //     echo json_encode($match);
-                    $val   = $match["column"];
+                    $val   = $match['column'];
                     $alias = false;
-                    if (isset($match["alias"])) { // name[alias][type]
-                        $alias = $match["alias"];
-                        if (isset($match["type"])) {
-                            $type = $match["type"];
+                    if (isset($match['alias'])) { // name[alias][type]
+                        $alias = $match['alias'];
+                        if (isset($match['type'])) {
+                            $type = $match['type'];
                         } else {
-                            if ($alias === "json" || $alias === "obj" || $alias === "int" || $alias === "string" || $alias === "bool") {
+                            if ($alias === 'json' || $alias === 'obj' || $alias === 'int' || $alias === 'string' || $alias === 'bool') {
                                 $type  = $alias;
                                 $alias = false;
                             } else
@@ -592,23 +577,20 @@ class Parser
         $multi   = isset($data[0]);
         $dt      = $multi ? $data[0] : $data;
         foreach ($dt as $key => &$val) {
-            if ($key[0] === '#') {
-                $raw = true;
-                $key = substr($key, 1);
-            } else {
-                $raw = false;
-            }
+            $raw = self::isRaw($key);
             if ($b !== 0) {
                 $sql .= ', ';
                 $append .= ', ';
             }
-            preg_match('/(?<out>[^\[]*)(?:\[(?<type>[^]]*)\])?/', $key, $matches);
-            $key = $matches["out"];
+            if (!$raw) {
+                preg_match('/(?<out>[^\[]*)(?:\[(?<type>[^]]*)\])?/', $key, $matches);
+                $key = $matches['out'];
+            }
             $sql .= '`' . $key . '`';
             if ($raw) {
                 $append .= $val;
             } else {
-                $type = isset($matches["type"]) ? $matches["type"] : false;
+                $type = isset($matches['type']) ? $matches['type'] : false;
                 $append .= '?';
                 $m2 = (!$type || ($type !== 'json' && $type !== 'obj')) && is_array($val);
                 array_push($values, self::value($type, $m2 ? $val[0] : $val));
@@ -618,7 +600,7 @@ class Parser
                     self::append($insert, $val, $i++, $values);
                 }
             }
-            $b++;
+            ++$b;
         }
         if ($multi)
             self::append2($insert, $indexes, $data, $values);
@@ -649,12 +631,7 @@ class Parser
         $multi   = isset($data[0]);
         $dt      = $multi ? $data[0] : $data;
         foreach ($dt as $key => &$val) {
-            if ($key[0] === '#') {
-                $raw = true;
-                $key = substr($key, 1);
-            } else {
-                $raw = false;
-            }
+            $raw = self::isRaw($key);
             if ($b !== 0) {
                 $sql .= ', ';
             }
@@ -662,10 +639,10 @@ class Parser
                 $sql .= '`' . $key . '` = ' . $val;
             } else {
                 preg_match('/(?:\[(?<arg>.{2})\])?(?<out>[^\[]*)(?:\[(?<type>[^\]]*)\])?/', $key, $matches);
-                $key = $matches["out"];
+                $key = $matches['out'];
                 $sql .= '`' . $key . '` = ';
-                if (isset($matches["arg"])) {
-                    switch ($matches["arg"]) {
+                if (isset($matches['arg'])) {
+                    switch ($matches['arg']) {
                         case '+=':
                             $sql .= '`' . $key . '` + ?';
                             break;
@@ -683,7 +660,7 @@ class Parser
                             break;
                     }
                 }
-                $type = isset($matches["type"]) ? $matches["type"] : false;
+                $type = isset($matches['type']) ? $matches['type'] : false;
                 $m2   = (!$type || ($type !== 'json' && $type !== 'obj')) && is_array($val);
                 array_push($values, self::value($type, $m2 ? $val[0] : $val));
                 if ($multi) {
@@ -692,7 +669,7 @@ class Parser
                     self::append($insert, $val, $i++, $values);
                 }
             }
-            $b++;
+            ++$b;
         }
         if ($multi)
             self::append2($insert, $indexes, $data, $values);

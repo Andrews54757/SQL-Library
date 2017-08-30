@@ -1,21 +1,25 @@
 {
-	"name": "threeletters/supersql",
-  "description": "SlickInject and Medoo on steroids - The most advanced and lightweight library of its kind.",
-  "version":"1.0.5",
-	"type": "framework",
-	"keywords": ["SQL","database","small","lightweight","advanced","MySQL"],
-	"homepage": "https://threeletters.github.io/SuperSQL/",
-	"license": "MIT",
-	"authors": [
-		{"name": "Andrew S", "email": "andrews54757@gmail.com", "role": "Developer"}
+    "name": "threeletters/supersql",
+    "description": "SlickInject and Medoo on steroids - The most advanced and lightweight library of its kind.",
+    "version": "1.0.51",
+    "type": "framework",
+    "keywords": ["SQL", "database", "small", "lightweight", "advanced", "MySQL"],
+    "homepage": "https://threeletters.github.io/SuperSQL/",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Andrew S",
+            "email": "andrews54757@gmail.com",
+            "role": "Developer"
+        }
 	],
-	"autoload": {
-		"psr-4": {
-			"SuperSQL\\": "dist/"
-		}
-	},
-  "require": {
-		"php": ">=5.4",
-		"ext-pdo": "*"
-	}
+    "autoload": {
+        "psr-4": {
+            "SuperSQL\\": "SuperSQL/",
+        }
+    },
+    "require": {
+        "php": ">=5.4",
+        "ext-pdo": "*"
+    }
 }

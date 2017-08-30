@@ -1,6 +1,5 @@
 # SuperSQL
-SlickInject and Medoo on steroids - The most advanced and lightweight library of its kind.
-
+SlickInject and Medoo on steroids - The most advanced and lightweight library of its kind. Develop using PHP & SQL quickly and securly.
 ## Purpose
 
 1. To provide a very fast and efficient way to edit sql databases
@@ -24,8 +23,8 @@ SlickInject and Medoo on steroids - The most advanced and lightweight library of
 You may either
 
 1. Use the built file (/dist/SuperSQL.php)
-2. Use the library (include index.php)
-3. Use composer (`composer require threeletters/supersql`) - Note, helper not available yet
+2. Use the library (include SuperSQL/index.php)
+3. Use composer (`composer require threeletters/supersql`)
 
 ```php
 new SuperSQL($dsn,$user,$pass);
@@ -89,17 +88,32 @@ Full documentation is here: http://supersql.tk/
 
 **Whats the difference between this and Medoo?**
 
-Not much - they are basically the equivalant - However, SuperSQL is slightly more advanced.
+While on the most basic level, SuperSQL and Medoo are the same, they are quite different.
 
 * Response class - SuperSQL has a response class to access crucial information, such as errors
 * Helper - SuperSQL comes with a helper class, with helper functions, while meedoo has it built right in.
 * Smaller & lightweight - SuperSQL is smaller than medoo
 * Development - SuperSQL's code is well structured and it is commented - so you can understand it more
 * SuperSQL is faster - Using xdebug, we found that superSQL's parser is faster than medoo's. (x1000,100%)
+* SuperSQL is less confusing. (EG, ``SELECT * FROM `table` `` is just `$SuperSQL->select('table');`)
+* SuperSQL has more features - (EG, multi-querying, dynamic responses)
+
+**Whats the difference between this an SlickInject?**
+
+SuperSQL uses the same concepts and design as slickInject. However, supersql is much much more advanced.
+
+**Eww, why PDO**
+
+PDO is much better than mysqli. Main reason because it supports so many different databases. Also, PDO is easier.
+
+**How did you make the documentation?**
+
+The nice documentation was created using [Slate - Check it out](https://github.com/lord/slate).
 
 ## Special thanks
 * @LegitSoulja - SlickInject
 * @catfan - Medoo
+* Slate (Documentation)
 
 ## License
 

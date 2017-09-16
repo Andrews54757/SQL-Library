@@ -3,8 +3,8 @@
  Author: Andrews54757
  License: MIT (https://github.com/ThreeLetters/SuperSQL/blob/master/LICENSE)
  Source: https://github.com/ThreeLetters/SQL-Library
- Build: v1.1.0
- Built on: 10/09/2017
+ Build: v1.1.5
+ Built on: 16/09/2017
 */
 
 namespace SuperSQL;

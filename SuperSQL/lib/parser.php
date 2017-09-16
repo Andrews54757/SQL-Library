@@ -83,17 +83,19 @@ class Parser
      * @param {Object} indexes - Indexes of keys
      * @param {Array} dt - Values to append
      */
-    static function append2(&$insert, $indexes, $dt, $values)
+    static function append2(&$insert, $indexes, $dt, &$values, $m = false)
     {
         $len = count($dt);
+        if ($m) {
+            self::recurse($values,$dt[0],$indexes,'',$values,0);
+        }
         for ($key = 1; $key < $len; $key++) {
-            $val = $dt[$key];
             if (!isset($insert[$key - 1]))
                 $insert[$key - 1] = array();
-            self::recurse($insert[$key - 1], $val, $indexes, '', $values);
+            self::recurse($insert[$key - 1], $dt[$key], $indexes, '', $values,1);
         }
     }
-    private static function recurse(&$holder, $val, $indexes, $par, $values)
+    private static function recurse(&$holder, $val, $indexes, $par, $values,$m)
     {
         foreach ($val as $k => &$v) {
             if ($k[0] === '#')
@@ -108,17 +110,19 @@ class Parser
                 if (isset($v[0])) {
                     foreach ($v as $i => &$j) {
                         $a = $d + $i;
-                        if (isset($holder[$a]))
+                        if ($m && isset($holder[$a]))
                             trigger_error('Key collision: ' . $k, E_USER_WARNING);
-                        $holder[$a] = self::value($values[$a][2],$j)[0];
+                        $holder[$a] = self::value($values[$a][2],$j);
+                       if ($m) $holder[$a] = $holder[$a][0];
                     }
                 } else {
-                    self::recurse($holder, $v, $indexes, $par . '/' . $k, $values);
+                    self::recurse($holder, $v, $indexes, $par . '/' . $k, $values,$m);
                 }
             } else {
-                if (isset($holder[$d]))
+                if ($m && isset($holder[$d]))
                     trigger_error('Key collision: ' . $k, E_USER_WARNING);
-                $holder[$d] = self::value($values[$d][2],$j)[0];
+                $holder[$d] = self::value($values[$d][2],$v);
+                if ($m) $holder[$d] = $holder[$d][0];
             }
         }
     }
@@ -222,7 +226,11 @@ class Parser
     {
         $num = 0;
         $sql = '';
-        foreach ($dt as $key => &$val) {
+        foreach ($dt as $key => $val) {
+            if (is_int($key)) {
+                $key = $val;
+                $val = '';   
+            }
             preg_match('/^(?<r>\#)?(?:(?:\[(?<a>.{2})\])(?:(?:\[(?<b>.{2})\])(?:\[(?<c>.{2})\])?)?)?(?<out>.*)/', $key, $matches); // 14 steps
             $raw  = ($matches['r'] === '#');
             $arg  = $matches['a'];
@@ -287,7 +295,10 @@ class Parser
                             array_push($values, self::value($type, $val[1]));
                         }
                     } else {
-                        foreach ($val as $k => &$v) {
+                        $u = isset($val[1]);
+                        $len = $u ? count($val) : $val[0];
+                        for ($k = 0; $k < $len; $k++) {
+                            $v = $u ? $val[$k] : '';
                             if ($k !== 0)
                                 $sql .= $newJoin;
                             ++$index;
@@ -346,6 +357,17 @@ class Parser
                 $sql .= self::conditions($val, $values, $f, $i);
             }
         }
+    }
+    static function WHERE(&$sql,$where,&$values,&$insert,$i = 0) {
+        $sql .= ' WHERE ';
+            if (isset($where[0])) {
+                 $index = array();
+                $sql .= self::conditions($where[0], $values, $index, $i);
+                $m = isset($where[0][0]) && isset($where[1][0]);
+                self::append2($insert, $index, $m ? $where[1] : $where, $values,$m);
+            } else {
+                $sql .= self::conditions($where, $values);
+            }
     }
     static function columns($columns, &$sql, &$outTypes)
     {
@@ -432,14 +454,7 @@ class Parser
             self::JOIN($join, $sql, $values, $i);
         }
         if (!empty($where)) {
-            $sql .= ' WHERE ';
-            if (isset($where[0])) {
-                $index = array();
-                $sql .= self::conditions($where[0], $values, $index, $i);
-                self::append2($insert, $index, $where, $values);
-            } else {
-                $sql .= self::conditions($where, $values);
-            }
+            self::WHERE($sql,$where,$values,$insert,$i);
         }
         if ($limit) {
             if (is_int($limit)) {
@@ -595,14 +610,7 @@ class Parser
         if ($multi)
             self::append2($insert, $indexes, $data, $values);
         if (!empty($where)) {
-            $sql .= ' WHERE ';
-            $index = array();
-            if (isset($where[0])) {
-                $sql .= self::conditions($where[0], $values, $index, $i);
-                self::append2($insert, $index, $where, $values);
-            } else {
-                $sql .= self::conditions($where, $values, $f, $i);
-            }
+            self::WHERE($sql,$where,$values,$insert,$i);
         }
         return array(
             $sql,
@@ -623,14 +631,7 @@ class Parser
         $sql    = 'DELETE FROM ' . self::table($table);
         $values = $insert = array();
         if (!empty($where)) {
-            $sql .= ' WHERE ';
-            $index = array();
-            if (isset($where[0])) {
-                $sql .= self::conditions($where[0], $values, $index);
-                self::append2($insert, $index, $where, $values);
-            } else {
-                $sql .= self::conditions($where, $values);
-            }
+            self::WHERE($sql,$where,$values,$insert);
         }
         return array(
             $sql,

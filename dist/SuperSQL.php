@@ -395,10 +395,8 @@ class Parser
         $num = 0;
         $sql = '';
         foreach ($dt as $key => $val) {
-            if (is_int($key)) {
-                $key = $val;
-                $val = '';   
-            }
+            if (is_int($key)) 
+                $key = $val;   
             preg_match('/^(?<r>\#)?(?:(?:\[(?<a>.{2})\])(?:(?:\[(?<b>.{2})\])(?:\[(?<c>.{2})\])?)?)?(?<out>.*)/', $key, $matches); 
             $raw  = ($matches['r'] === '#');
             $arg  = $matches['a'];

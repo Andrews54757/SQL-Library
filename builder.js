@@ -255,6 +255,7 @@ function minify(str, options) {
             i += 7;
             varMap = {};
             varIndex = [1];
+            out.push('function')
         } else {
             out.push(char)
         }

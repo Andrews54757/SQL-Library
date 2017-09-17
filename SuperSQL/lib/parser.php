@@ -106,8 +106,8 @@ class Parser
             if (is_array($v) && !self::isSpecial($values[$d][2])) {
                 if (isset($v[0])) {
                     foreach ($v as $i => $j) {
-                        $i = $d + $i;
-                        if ($m && isset($holder[$a]))
+                        $i += $d;
+                        if ($m && isset($holder[$i]))
                             trigger_error('Key collision: ' . $k, E_USER_WARNING);
                         $holder[$i] = self::value($values[$i][2],$j);
                        if ($m) $holder[$i] = $holder[$i][0];

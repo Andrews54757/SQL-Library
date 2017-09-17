@@ -257,6 +257,7 @@ function minify(str, options) {
 
     }
     return out.join("");
+    
 }
 
 var fs = require("fs");

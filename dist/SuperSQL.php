@@ -4,7 +4,7 @@
  License: MIT (https://github.com/ThreeLetters/SuperSQL/blob/master/LICENSE)
  Source: https://github.com/ThreeLetters/SQL-Library
  Build: v1.1.5
- Built on: 16/09/2017
+ Built on: 17/09/2017
 */
 
 namespace SuperSQL;
@@ -242,9 +242,8 @@ class Parser
         if (isset($m[1])) {
             $str = $m[2];
             return $m[1];
-        } else {
-            return false;
         }
+        return false;
     }
     static function isRaw(&$key)
     {        
@@ -270,8 +269,8 @@ class Parser
     }
     static function stripArgs(&$key)
     {
-        preg_match('/(?:\[.{2}\]){0,2}([^\[]*)/', $key, $matches); 
-        return $matches[1];
+        preg_match('/(?:\[.{2}\]){0,3}([^\[]*)/', $key, $m); 
+        return $m[1];
     }
     static function append2(&$insert, $indexes, $dt, &$values, $m = false)
     {
@@ -287,10 +286,8 @@ class Parser
     }
     private static function recurse(&$holder, $val, $indexes, $par, $values,$m)
     {
-        foreach ($val as $k => &$v) {
-            if ($k[0] === '#')
-                continue;
-            self::stripArgs($k);
+        foreach ($val as $k => $v) {
+            $k = self::stripArgs($k);
             $k1 = $k . '#' . $par;
             if (isset($indexes[$k1]))
                 $d = $indexes[$k1];
@@ -298,12 +295,12 @@ class Parser
                 $d = $indexes[$k];
             if (is_array($v) && !self::isSpecial($values[$d][2])) {
                 if (isset($v[0])) {
-                    foreach ($v as $i => &$j) {
-                        $a = $d + $i;
+                    foreach ($v as $i => $j) {
+                        $i = $d + $i;
                         if ($m && isset($holder[$a]))
                             trigger_error('Key collision: ' . $k, E_USER_WARNING);
-                        $holder[$a] = self::value($values[$a][2],$j);
-                       if ($m) $holder[$a] = $holder[$a][0];
+                        $holder[$i] = self::value($values[$i][2],$j);
+                       if ($m) $holder[$i] = $holder[$i][0];
                     }
                 } else {
                     self::recurse($holder, $v, $indexes, $par . '/' . $k, $values,$m);
@@ -318,11 +315,11 @@ class Parser
     }
     static function quote($str)
     {
-        preg_match('/([a-zA-Z0-9_]*)\.?([a-zA-Z0-9_]*)?/', $str, $matches); 
-        if ($matches[2] !== '') {
-            return '`' . $matches[1] . '`.`' . $matches[2] . '`';
+        preg_match('/([a-zA-Z0-9_]*)\.?([a-zA-Z0-9_]*)?/', $str, $m); 
+        if ($m[2] !== '') {
+            return '`' . $m[1] . '`.`' . $m[2] . '`';
         } else {
-            return '`' . $matches[1] . '`';
+            return '`' . $m[1] . '`';
         }
     }
     static function quoteArray(&$arr)
@@ -335,13 +332,13 @@ class Parser
     {
         if (is_array($table)) {
             $sql = '';
-            foreach ($table as $i => &$val) {
-                $t = self::getType($val);
+            foreach ($table as $i => $val) {
+                $alias = self::getType($val);
                 if ($i !== 0)
                     $sql .= ', ';
                 $sql .= '`' . $val . '`';
                 if ($t)
-                    $sql .= ' AS `' . $t . '`';
+                    $sql .= ' AS `' . $alias . '`';
             }
             return $sql;
         } else {
@@ -370,8 +367,7 @@ class Parser
         } else if ($type === 'object') {
             $value = serialize($value);
         } else {
-            $value = (string) $value;
-            trigger_error('Invalid type ' . $type . ' Assumed STRING', E_USER_WARNING);
+            trigger_error('Invalid type ' . $type, E_USER_WARNING);
         }
         return array(
             $value,
@@ -387,8 +383,8 @@ class Parser
     }
     static function rmComments($str)
     {
-        preg_match('/([^#]*)/', $str, $matches);
-        return $matches[1];
+        preg_match('/([^#]*)/', $str, $m);
+        return $m[1];
     }
     static function conditions($dt, &$values, &$map = false, &$index = 0, $join = ' AND ', $operator = ' = ', $parent = '')
     {
@@ -397,10 +393,10 @@ class Parser
         foreach ($dt as $key => $val) {
             if (is_int($key)) 
                 $key = $val;   
-            preg_match('/^(?<r>\#)?(?:(?:\[(?<a>.{2})\])(?:(?:\[(?<b>.{2})\])(?:\[(?<c>.{2})\])?)?)?(?<out>.*)/', $key, $matches); 
-            $raw  = ($matches['r'] === '#');
-            $arg  = $matches['a'];
-            $key  = $matches['out'];
+            preg_match('/^(?<r>\#)?(?:(?:\[(?<a>.{2})\])(?:(?:\[(?<b>.{2})\])(?:\[(?<c>.{2})\])?)?)?(?<out>.*)/', $key, $m); 
+            $raw  = ($m['r'] === '#');
+            $arg  = $m['a'];
+            $key  = $m['out'];
             $newJoin     = $join;
             $newOperator = $operator;
             $type        = $raw ? false : self::getType($key);
@@ -408,11 +404,11 @@ class Parser
             $useBind     = $arr && !isset($val[0]);
             if ($arg && ($arg === '||' || $arg === '&&')) {
                 $newJoin = ($arg === '||') ? ' OR ' : ' AND ';
-                $arg     = $matches['b'];
+                $arg     = $m['b'];
                 if ($arr && $arg && ($arg === '||' || $arg === '&&')) {
                     $join    = $newJoin;
                     $newJoin = ($arg === '||') ? ' OR ' : ' AND ';
-                    $arg     = $matches['c'];
+                    $arg     = $m['c'];
                 }
             }
             $between = false;
@@ -461,10 +457,10 @@ class Parser
                             array_push($values, self::value($type, $val[1]));
                         }
                     } else {
-                        $u = isset($val[1]);
-                        $len = $u ? count($val) : $val[0];
+                        $m = isset($val[1]);
+                        $len = $m ? count($val) : $val[0];
                         for ($k = 0; $k < $len; $k++) {
-                            $v = $u ? $val[$k] : '';
+                            $v = $m ? $val[$k] : '';
                             if ($k !== 0)
                                 $sql .= $newJoin;
                             ++$index;
@@ -528,7 +524,7 @@ class Parser
             if (isset($where[0])) {
                  $index = array();
                 $sql .= self::conditions($where[0], $values, $index, $i);
-                $m = isset($where[0][0]) && isset($where[1][0]);
+                $m = isset($where[1][0]);
                 self::append2($insert, $index, $m ? $where[1] : $where, $values,$m);
             } else {
                 $sql .= self::conditions($where, $values);
@@ -555,8 +551,8 @@ class Parser
                 array_splice($columns, 0, 1);
                 $sql .= '*';
                 foreach ($columns as $i => $val) {
-                    $t = self::getType($val);
-                    $outTypes[$val] = $t;
+                    $type = self::getType($val);
+                    $outTypes[$val] = $type;
                 }
             } else {
                 foreach ($columns as $i => $val) {
@@ -655,15 +651,15 @@ class Parser
         $sql      = 'INSERT INTO ' . self::table($table) . ' (';
         $values   = $insert = $index = array();
         $valuestr = '';
-        $b        = 0;
+        $i        = 0;
         $multi    = isset($data[0]);
         $dt       = $multi ? $data[0] : $data;
         foreach ($dt as $key => $val) {
             $raw = self::isRaw($key);
-            if ($b) {
+            if ($i) {
                 $sql .= ', ';
                 $valuestr .= ', ';
-            } else $b = 1;
+            } else $i = 1;
             if (!$raw)
                 $type = self::getType($key);
             $sql .= '`' . $key . '`';
@@ -671,14 +667,14 @@ class Parser
                 $valuestr .= $val;
             } else {
                 $valuestr .= '?';
-                $m2 = !$multi && (!$type || !self::isSpecial($type)) && is_array($val);
-                array_push($values, self::value($type, $m2 ? $val[0] : $val));
+                $m = !$multi && (!$type || !self::isSpecial($type)) && is_array($val);
+                array_push($values, self::value($type, $m ? $val[0] : $val));
                 if ($multi) {
                     $index[$key] = array(
                         $val,
                         $type
                     );
-                } else if ($m2) {
+                } else if ($m) {
                     self::append($insert, $val, $i++, $values);
                 }
             }
@@ -686,10 +682,10 @@ class Parser
         $sql .= ') VALUES (' . $valuestr . ')';
         if ($multi) {
             unset($data[0]);
-            foreach ($data as $query) {
+            foreach ($data as $v) {
                 $sql .= ', (' . $valuestr . ')';
                 foreach ($index as $key => $val) {
-                    array_push($values, self::value($val[1], isset($query[$key]) ? $query[$key] : $val[0]));
+                    array_push($values, self::value($val[1], isset($v[$key]) ? $v[$key] : $val[0]));
                 }
             }
         }
@@ -704,14 +700,14 @@ class Parser
     {
         $sql    = 'UPDATE ' . self::table($table) . ' SET ';
         $values = $insert = $indexes = array();
-        $i      = $b = 0;
+        $i      = $j = 0;
         $multi  = isset($data[0]);
         $dt     = $multi ? $data[0] : $data;
         foreach ($dt as $key => &$val) {
             $raw = self::isRaw($key);
-            if ($b) {
+            if ($j) {
                 $sql .= ', ';
-            } else $b = 1;
+            } else $j = 1;
             if ($raw) {
                 $sql .= '`' . $key . '` = ' . $val;
             } else {
@@ -735,11 +731,11 @@ class Parser
                             break;
                     }
                 } else $sql .= '?';
-                $m2   = (!$type || !self::isSpecial($type)) && is_array($val);
-                array_push($values, self::value($type, $m2 ? $val[0] : $val));
+                $m   = (!$type || !self::isSpecial($type)) && is_array($val);
+                array_push($values, self::value($type, $m ? $val[0] : $val));
                 if ($multi) {
                     $indexes[$key] = $i++;
-                } else if ($m2) {
+                } else if ($m) {
                     self::append($insert, $val, $i++, $values);
                 }
             }

@@ -254,7 +254,7 @@ function minify(str, options) {
         } else if (char === 'f' && str[i + 1] === 'u' && str[i + 2] === 'n' && str[i + 3] === 'c' && str[i + 4] === 't' && str[i + 5] === 'i' && str[i + 6] === 'o' && str[i + 7] === 'n') {
             i += 7;
             varMap = {};
-            varIndex = [1];
+            varIndex = [0];
             out.push('function')
         } else {
             out.push(char)

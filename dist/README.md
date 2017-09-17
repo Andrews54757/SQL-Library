@@ -16,7 +16,7 @@
 
 ```
 * SuperSQL.php - 297fc797e94ac7edd579f5aaf05718b5
-* SuperSQL_min.php - 016254ecad25d1508b0a2ad2ea36e1ab
+* SuperSQL_min.php - b7b11cefd0f8a4eb214b86ce7da5c7e4
 * SuperSQL_helper.php - f58567fcc0db176288bca0463bb51e84
-* SuperSQL_helper_min.php - 81ad3208c3dae16d974f7a645fa45eff
+* SuperSQL_helper_min.php - fdf75a1e6db0c12a75bf893d86f526f7
 ```

@@ -15,15 +15,13 @@ class Response implements \ArrayAccess, \Iterator
     public $result;
     public $affected;
     public $ind = 0;
-    public $error;
-    public $errorData;
+    public $error = false;
     public $outTypes;
     public $complete = true;
-    function __construct($data, $error, &$outtypes, $mode)
+    function __construct($data, $error, $outtypes, $mode)
     {
-        $this->error = !$error;
         if (!$error) {
-            $this->errorData = $data->errorInfo();
+            $this->error = $data->errorInfo();
         } else {
             $this->outTypes = $outtypes;
             if ($mode === 0) { 
@@ -98,7 +96,7 @@ class Response implements \ArrayAccess, \Iterator
     }
     function error()
     {
-        return $this->error ? $this->errorData : false;
+        return $this->errorData;
     }
     function getData($current = false)
     {
@@ -106,13 +104,9 @@ class Response implements \ArrayAccess, \Iterator
             $this->fetchAll();
         return $this->result;
     }
-    function getAffected()
+    function rowCount()
     {
         return $this->affected;
-    }
-    function countRows()
-    {
-        return count($this->result);
     }
     function offsetSet($offset, $value) 
     {
@@ -174,12 +168,7 @@ class Connector
     public $dev = false;
     function __construct($dsn, $user, $pass)
     {
-        try {
-            $this->db = new \PDO($dsn, $user, $pass);
-        }
-        catch (\PDOException $e) {
-            throw new \Exception($e->getMessage());
-        }
+        $this->db = new \PDO($dsn, $user, $pass);
     }
     function query($query, $obj = null, $outtypes = null, $mode = 0)
     {
@@ -199,7 +188,7 @@ class Connector
             return $q;
         }
     }
-    function _query(&$sql, $values, &$insert, &$outtypes = null, $mode = 0)
+    function _query($sql, $values, $insert, $outtypes = null, $mode = 0)
     {
         $q = $this->db->prepare($sql);
         if ($this->dev)
@@ -792,7 +781,6 @@ class Parser
 class SuperSQL
 {
     public $con;
-    public $lockMode = false;
     function __construct($dsn, $user, $pass)
     {
         $this->con = new Connector($dsn, $user, $pass);
@@ -804,7 +792,7 @@ class SuperSQL
             $join  = null;
         }
         $d = Parser::SELECT($table, $columns, $where, $join, $limit);
-        return $this->con->_query($d[0], $d[1], $d[2], $d[3], $this->lockMode ? 0 : 1);
+        return $this->con->_query($d[0], $d[1], $d[2], $d[3], 1);
     }
     function INSERT($table, $data, $append = null)
     {
@@ -840,16 +828,17 @@ class SuperSQL
     function transact($func)
     {
         $this->con->db->beginTransaction();
+        try {
         $r = $func($this);
+        } catch (\Exception $e) {
+            $this->con->db->rollBack();
+            return false;
+        }
         if ($r === false)
             $this->con->db->rollBack();
         else
             $this->con->db->commit();
         return $r;
-    }
-    function modeLock($val)
-    {
-        $this->lockMode = $val;
     }
 }
 ?>

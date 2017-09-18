@@ -29,18 +29,16 @@ class Response implements \ArrayAccess, \Iterator
     public $result;
     public $affected;
     public $ind = 0;
-    public $error;
-    public $errorData;
+    public $error = false;
     public $outTypes;
     public $complete = true;
     /**
      * Gets data from a query
      */
-    function __construct($data, $error, &$outtypes, $mode)
+    function __construct($data, $error, $outtypes, $mode)
     {
-        $this->error = !$error;
         if (!$error) {
-            $this->errorData = $data->errorInfo();
+            $this->error = $data->errorInfo();
         } else {
             $this->outTypes = $outtypes;
             if ($mode === 0) { // fetch all
@@ -118,7 +116,7 @@ class Response implements \ArrayAccess, \Iterator
      */
     function error()
     {
-        return $this->error ? $this->errorData : false;
+        return $this->errorData;
     }
     /**
      * Gets data from the query
@@ -136,13 +134,9 @@ class Response implements \ArrayAccess, \Iterator
      *
      * @returns {Int}
      */
-    function getAffected()
+    function rowCount()
     {
         return $this->affected;
-    }
-    function countRows()
-    {
-        return count($this->result);
     }
     // BEGIN ARRAYACCESS
     function offsetSet($offset, $value) // do nothing
@@ -221,12 +215,7 @@ class Connector
      */
     function __construct($dsn, $user, $pass)
     {
-        try {
-            $this->db = new \PDO($dsn, $user, $pass);
-        }
-        catch (\PDOException $e) {
-            throw new \Exception($e->getMessage());
-        }
+        $this->db = new \PDO($dsn, $user, $pass);
     }
     /**
      * Queries database
@@ -261,7 +250,7 @@ class Connector
      *
      * @returns {SQLResponse|SQLResponse[]}
      */
-    function _query(&$sql, $values, &$insert, &$outtypes = null, $mode = 0)
+    function _query($sql, $values, $insert, $outtypes = null, $mode = 0)
     {
         $q = $this->db->prepare($sql);
         if ($this->dev)

@@ -30,7 +30,6 @@ use SuperSQL\lib\Connector as Connector;
 class SuperSQL
 {
     public $con;
-    public $lockMode = false;
     /**
      * Creates a connection
      * @param {String} dsn - DSN of the connection
@@ -59,7 +58,7 @@ class SuperSQL
             $join  = null;
         }
         $d = Parser::SELECT($table, $columns, $where, $join, $limit);
-        return $this->con->_query($d[0], $d[1], $d[2], $d[3], $this->lockMode ? 0 : 1);
+        return $this->con->_query($d[0], $d[1], $d[2], $d[3], 1);
     }
     /**
      * Inserts data into a SQL table
@@ -135,16 +134,17 @@ class SuperSQL
     function transact($func)
     {
         $this->con->db->beginTransaction();
+        try {
         $r = $func($this);
+        } catch (\Exception $e) {
+            $this->con->db->rollBack();
+            return false;
+        }
         if ($r === false)
             $this->con->db->rollBack();
         else
             $this->con->db->commit();
         return $r;
-    }
-    function modeLock($val)
-    {
-        $this->lockMode = $val;
     }
 }
 // BUILD BETWEEN

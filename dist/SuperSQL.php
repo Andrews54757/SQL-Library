@@ -428,12 +428,12 @@ class Parser
                     $between = true;
                 } else if ($arr && $arg === 'MM') {
                     $match = $m['c'] ? $m['c'] : $m['b'];
-					$mode_array = array(
-						'NN' => 'IN NATURAL LANGUAGE MODE',
-						'NQ' => 'IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION',
-						'BB' => 'IN BOOLEAN MODE',
-						'QQ' => 'WITH QUERY EXPANSION'
-					);
+                    $mode_array = array(
+                        'NN' => 'IN NATURAL LANGUAGE MODE',
+                        'NQ' => 'IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION',
+                        'BB' => 'IN BOOLEAN MODE',
+                        'QQ' => 'WITH QUERY EXPANSION'
+                    );
                     $match = isset($mode_array[$match]) ? ' ' . $mode_array[$match] : '';
                 } else {
                     throw new \Exception('Invalid operator ' . $arg . ' Available: ==,!=,>>,<<,>=,<=,~~,!~,<>,><');

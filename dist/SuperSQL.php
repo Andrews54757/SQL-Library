@@ -723,7 +723,9 @@ class Parser
         $i      = $j = 0;
         $multi  = isset($data[0]);
         $dt     = $multi ? $data[0] : $data;
-        foreach ($dt as $key => &$val) {
+        $temp   = isset($data[1][0]);
+        foreach ($dt as $key => $val) {
+            if ($temp) $key = $val;
             $raw = self::isRaw($key);
             if ($j) {
                 $sql .= ', ';
@@ -733,6 +735,7 @@ class Parser
             } else {
                 $arg = self::getArg($key);
                 $type = self::getType($key);
+                if ($temp) $val = $data[1][0][$key];
                 $sql .= '`' . $key . '` = ';
                 if ($arg) {
                     $sql .= '`' . $key . '` ';
@@ -761,10 +764,9 @@ class Parser
             }
         }
         if ($multi)
-            self::append2($insert, $indexes, $data, $values);
-        if (!empty($where)) {
+            self::append2($insert, $indexes, $temp ? $data[1] : $data, $values);
+        if (!empty($where))
             self::WHERE($sql,$where,$values,$insert,$i);
-        }
         return array(
             $sql,
             $values,

@@ -4,7 +4,7 @@
  License: MIT (https://github.com/ThreeLetters/SuperSQL/blob/master/LICENSE)
  Source: https://github.com/ThreeLetters/SQL-Library
  Build: v1.1.5
- Built on: 17/09/2017
+ Built on: 18/09/2017
 */
 
 namespace SuperSQL;
@@ -412,6 +412,7 @@ class Parser
                 }
             }
             $between = false;
+            $match = false;
             if ($arg && $arg !== '==') {
                 if ($arg === '!=' || $arg === '>=' || $arg === '<=') {
                     $newOperator = ' ' . $arg . ' ';
@@ -425,6 +426,15 @@ class Parser
                     $newOperator = ' NOT LIKE ';
                 } else if ($arg === '><' || $arg === '<>') {
                     $between = true;
+                } else if ($arr && $arg === 'MM') {
+                    $match = $m['c'] ? $m['c'] : $m['b'];
+					$mode_array = array(
+						'NN' => 'IN NATURAL LANGUAGE MODE',
+						'NQ' => 'IN NATURAL LANGUAGE MODE WITH QUERY EXPANSION',
+						'BB' => 'IN BOOLEAN MODE',
+						'QQ' => 'WITH QUERY EXPANSION'
+					);
+                    $match = isset($mode_array[$match]) ? ' ' . $mode_array[$match] : '';
                 } else {
                     throw new \Exception('Invalid operator ' . $arg . ' Available: ==,!=,>>,<<,>=,<=,~~,!~,<>,><');
                 }
@@ -446,7 +456,13 @@ class Parser
                         $map[$key]                 = $index;
                         $map[$key . '#' . $parent] = $index++;
                     }
-                    if ($between) {
+                    if ($match !== false) {
+                        $keyword = $val['keyword'];
+                        unset($val['keyword']);
+                        self::quoteArray($val);
+                        $sql .= 'MATCH(' . implode($val, ', ') . ') AGAINST (?' . $match . ')';
+                        array_push($values, self::value($type, $keyword));
+                    } else if ($between) {
                         $index += 2;
                         $sql .= $column . ($arg === '<>' ? 'NOT' : '') . ' BETWEEN ';
                         if ($raw) {

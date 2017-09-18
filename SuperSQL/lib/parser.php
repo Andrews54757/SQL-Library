@@ -522,8 +522,10 @@ class Parser
         $valuestr = '';
         $i        = 0;
         $multi    = isset($data[0]);
+        $temp     = isset($data[1][0]);
         $dt       = $multi ? $data[0] : $data;
         foreach ($dt as $key => $val) {
+            if ($temp) $key = $val;
             $raw = self::isRaw($key);
             if ($i) {
                 $sql .= ', ';
@@ -531,6 +533,7 @@ class Parser
             } else $i = 1;
             if (!$raw)
                 $type = self::getType($key);
+            if ($temp) $val = $data[1][0][$key];
             $sql .= '`' . $key . '`';
             if ($raw) {
                 $valuestr .= $val;
@@ -549,7 +552,9 @@ class Parser
             }
         }
         $sql .= ') VALUES (' . $valuestr . ')';
+        
         if ($multi) {
+            if ($temp) $data = $data[1];
             unset($data[0]);
             foreach ($data as $v) {
                 $sql .= ', (' . $valuestr . ')';

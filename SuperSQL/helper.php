@@ -142,13 +142,13 @@ class SQLHelper
         }
         return new SuperSQL($dsn, $user, $pass);
     }
-    private static function escape($value)
+    function escape($value)
     {
         $var = strtolower(gettype($value));
         if ($var == 'boolean') {
             $value = $value ? '1' : '0';
         } else if ($var == 'string') {
-            $value = '\'' . $value . '\'';
+            $value = $this->s->con->db->quote($value);
         } else if ($var == 'double' || $var == 'integer') {
             $value = (int) $value;
         } else if ($var == 'null') {
@@ -219,7 +219,7 @@ class SQLHelper
         foreach ($data as $key => $val) {
             $str = '`' . Parser::rmComments($key) . '`';
             foreach ($val as $k => $v) {
-                $str = 'REPLACE(' . $str . ', ' . self::escape($k) . ', ' . self::escape($v) . ')';
+                $str = 'REPLACE(' . $str . ', ' . $this->escape($k) . ', ' . $this->escape($v) . ')';
             }
             $newData['#' . $key] = $str;
         }
@@ -342,6 +342,45 @@ class SQLHelper
             recurse2($filtered, $row, $r->result[$i]);
         }
         return $r;
+    }
+    function info() {
+        return array(
+            'server' => $this->s->con->db->getAttribute(\PDO::ATTR_SERVER_INFO),
+            'driver' => $this->s->con->db->getAttribute(\PDO::ATTR_DRIVER_NAME),
+            'client' => $this->s->con->db->getAttribute(\PDO::ATTR_CLIENT_VERSION),
+            'version' => $this->s->con->db->getAttribute(\PDO::ATTR_SERVER_VERSION),
+            'connection' => $this->s->con->db->getAttribute(\PDO::ATTR_CONNECTION_STATUS)
+            );
+    }
+    function getLog() {
+        $log = $this->s->getLog();
+        $out = array();
+        
+        foreach ($log as $val) { 
+            $split = explode('?',$val[0]);
+            $str = '';
+            foreach ($split as $i => $s) {
+                $str .= $s . (isset($val[1][$i]) ? $this->escape($val[1][$i][0]) : '');
+            }
+            array_push($out,$str);
+            
+            if (isset($val[2])) {
+                foreach ($val[2] as $in) {
+                  foreach ($in as $k => $v) {
+                      $val[1][$k][0] = $v;
+                  }
+                    $str = '';
+                    foreach ($split as $i => $s) {
+                    $str .= $s . (isset($val[1][$i]) ? $this->escape($val[1][$i][0]) : '');
+                    }
+                    array_push($out,$str);
+                }
+            }
+        }
+        return $out;
+    }
+    function dev() {
+        $this->s->dev();
     }
 }
 // BUILD BETWEEN

@@ -4,13 +4,13 @@
  License: MIT (https://github.com/ThreeLetters/SuperSQL/blob/master/LICENSE)
  Source: https://github.com/ThreeLetters/SQL-Library
  Build: v1.1.5
- Built on: 18/09/2017
+ Built on: 20/09/2017
 */
 
 namespace SuperSQL;
 
 // lib/connector.php
-class Response implements \ArrayAccess, \Iterator
+class SQLResponse implements \ArrayAccess, \Iterator
 {
     public $result;
     public $affected;
@@ -67,7 +67,7 @@ class Response implements \ArrayAccess, \Iterator
         while ($this->fetchNextRow()) {
         }
     }
-    function map(&$row, &$outtypes)
+    private function map(&$row, &$outtypes)
     {
         foreach ($outtypes as $col => $dt) {
             if (isset($row[$col])) {
@@ -161,7 +161,7 @@ class Response implements \ArrayAccess, \Iterator
         return $this->offsetExists($this->ind);
     }
 }
-class Connector
+class SQLConnector
 {
     public $db;
     public $log = array();
@@ -183,7 +183,7 @@ class Connector
                 $obj
             ));
         if ($mode !== 3) {
-            return new Response($q, $e, $outtypes, $mode);
+            return new SQLResponse($q, $e, $outtypes, $mode);
         } else {
             return $q;
         }
@@ -202,16 +202,16 @@ class Connector
         }
         $e = $q->execute();
         if (!isset($insert[0])) { 
-            return new Response($q, $e, $outtypes, $mode);
+            return new SQLResponse($q, $e, $outtypes, $mode);
         } else { 
             $responses = array();
-            array_push($responses, new Response($q, $e, $outtypes, 0));
+            array_push($responses, new SQLResponse($q, $e, $outtypes, 0));
             foreach ($insert as $key => $value) {
                 foreach ($value as $k => &$val) {
                     $values[$k][0] = $val;
                 }
                 $e = $q->execute();
-                array_push($responses, new Response($q, $e, $outtypes, 0));
+                array_push($responses, new SQLResponse($q, $e, $outtypes, 0));
             }
             return $responses;
         }
@@ -783,7 +783,7 @@ class SuperSQL
     public $con;
     function __construct($dsn, $user, $pass)
     {
-        $this->con = new Connector($dsn, $user, $pass);
+        $this->con = new SQLConnector($dsn, $user, $pass);
     }
     function SELECT($table, $columns = array(), $where = array(), $join = null, $limit = false)
     {

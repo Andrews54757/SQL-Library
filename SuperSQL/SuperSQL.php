@@ -25,7 +25,7 @@ SOFTWARE.
 namespace SuperSQL;
 
 use SuperSQL\lib\Parser as Parser;
-use SuperSQL\lib\Connector as Connector;
+use SuperSQL\lib\SQLConnector as SQLConnector;
 // BUILD BETWEEN
 class SuperSQL
 {
@@ -38,7 +38,7 @@ class SuperSQL
      */
     function __construct($dsn, $user, $pass)
     {
-        $this->con = new Connector($dsn, $user, $pass);
+        $this->con = new SQLConnector($dsn, $user, $pass);
     }
     /**
      * Queries a SQL table (SELECT)

@@ -24,7 +24,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 // BUILD BETWEEN
-class Response implements \ArrayAccess, \Iterator
+class SQLResponse implements \ArrayAccess, \Iterator
 {
     public $result;
     public $affected;
@@ -84,7 +84,7 @@ class Response implements \ArrayAccess, \Iterator
         while ($this->fetchNextRow()) {
         }
     }
-    function map(&$row, &$outtypes)
+    private function map(&$row, &$outtypes)
     {
         foreach ($outtypes as $col => $dt) {
             if (isset($row[$col])) {
@@ -202,7 +202,7 @@ class Response implements \ArrayAccess, \Iterator
         return $this->offsetExists($this->ind);
     }
 }
-class Connector
+class SQLConnector
 {
     public $db;
     public $log = array();
@@ -236,7 +236,7 @@ class Connector
                 $obj
             ));
         if ($mode !== 3) {
-            return new Response($q, $e, $outtypes, $mode);
+            return new SQLResponse($q, $e, $outtypes, $mode);
         } else {
             return $q;
         }
@@ -264,16 +264,16 @@ class Connector
         }
         $e = $q->execute();
         if (!isset($insert[0])) { // Single query
-            return new Response($q, $e, $outtypes, $mode);
+            return new SQLResponse($q, $e, $outtypes, $mode);
         } else { // Multi Query
             $responses = array();
-            array_push($responses, new Response($q, $e, $outtypes, 0));
+            array_push($responses, new SQLResponse($q, $e, $outtypes, 0));
             foreach ($insert as $key => $value) {
                 foreach ($value as $k => &$val) {
                     $values[$k][0] = $val;
                 }
                 $e = $q->execute();
-                array_push($responses, new Response($q, $e, $outtypes, 0));
+                array_push($responses, new SQLResponse($q, $e, $outtypes, 0));
             }
             return $responses;
         }

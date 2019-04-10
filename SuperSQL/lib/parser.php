@@ -374,7 +374,15 @@ class Parser
                     break;
             }
             
-            $sql .= ' JOIN `' . $key . '` ON ';
+            $sql .= ' JOIN `' . $key . '` ';
+            
+            if(!$raw && count($val) == 1 && strpos(array_values($val)[0],'.') === false) {
+                $sql .= 'USING (`' . array_values($val)[0] . '`) ';
+                return;
+            }
+            
+            $sql .= 'ON ';
+
             if ($raw) {
                 $sql .= $val;
             } else {
